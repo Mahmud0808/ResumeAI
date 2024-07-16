@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import QuillEditor from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
@@ -14,6 +14,10 @@ const RichTextEditor = ({
   defaultValue: string;
 }) => {
   const [value, setValue] = useState(defaultValue);
+
+  useEffect(() => {
+    setValue(defaultValue);
+  }, [defaultValue]);
 
   const modules = useMemo(
     () => ({

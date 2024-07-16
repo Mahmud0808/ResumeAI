@@ -52,6 +52,20 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
     });
   };
 
+  const handleRichTextChange = (index: number, event: any) => {
+    const newEntries = experienceList.slice();
+    const { name, value } = event.target;
+    newEntries[index][name] = value;
+    setExperienceList(newEntries);
+
+    handleInputChange({
+      target: {
+        name: "experience",
+        value: newEntries,
+      },
+    });
+  };
+
   const AddNewExperience = () => {
     const newEntries = [
       ...experienceList,
@@ -259,8 +273,8 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
                     <RichTextEditor
                       index={index}
                       defaultValue={item?.workSummary || ""}
-                      onRichTextEditorChange={(event: any) =>
-                        handleChange(index, event)
+                      onRichTextEditorChange={(value: string) =>
+                        handleRichTextChange(index, value)
                       }
                     />
                   }
