@@ -2,32 +2,214 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    --conic-gradient: conic-gradient(
+      #ff2e2e,
+      #ff831e,
+      #fcff51,
+      #48da48,
+      #575fff,
+      #ff57e5
+    );
+  }
+
+  html {
+    scroll-behavior: smooth;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer components {
+  :root {
+    --primary: rgb(67, 90, 218);
+    --secondary: #5ca3dd;
+  }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .no-focus {
+    @apply focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 !important;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300 h-10 px-4 py-2 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50;
+  }
+
+  /* Hide scrollbar for Chrome, Safari, and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge, and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
+
+/* Quill Editor */
+.ql-toolbar {
+  @apply rounded-t-lg;
+}
+
+.ql-container {
+  @apply rounded-b-lg overflow-y-scroll no-scrollbar resize-y;
+}
+
+.ql-editor {
+  @apply min-h-[10em];
+}
+
+.ql-snow {
+  @apply !border-[#E2E8F0];
+}
+
+.form-preview ol {
+  @apply list-decimal ml-80;
+}
+
+.form-preview ul {
+  @apply list-disc ml-8;
+}
+
+.form-preview blockquote {
+  @apply border-l-2 border-slate-300 pl-4;
+}
+
+.form-preview h1 {
+  @apply text-2xl;
+}
+
+.form-preview h2 {
+  @apply text-xl;
+}
+
+.form-preview h3 {
+  @apply text-lg;
+}
+
+.form-preview h4 {
+  @apply text-base;
+}
+
+.form-preview h5 {
+  @apply text-sm;
+}
+
+.form-preview h6 {
+  @apply text-xs;
+}
+
+.form-preview a {
+  @apply text-sky-500 underline;
+}
+
+/* View Resume */
+@media print {
+  #no-print {
+    display: none;
+  }
+
+  #print-area {
+    width: 100%;
+  }
+}
+
+/* Skeleton */
+.skeleton {
+  @apply overflow-hidden relative bg-gray-200 bg-gradient-to-r from-transparent via-gray-200 to-transparent before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1s_infinite] before:border-t before:border-gray-300 before:bg-gradient-to-r before:from-transparent before:via-gray-300 before:to-transparent;
+}
+
+/* Theme Button */
+.btn-gradient {
+  border-radius: 0.5rem;
+  margin-left: 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  transform: scale(1.1);
+}
+
+.btn-gradient::before {
+  content: "";
+  position: absolute;
+  width: 110%;
+  height: 350%;
+  background: var(--conic-gradient);
+  animation: spin 3s infinite linear;
+}
+
+.btn-gradient::after {
+  content: "Theme";
+  position: absolute;
+  background-color: #edeef3;
+  width: 96%;
+  height: 86%;
+  border-radius: 0.4em;
+  color: #000000cc;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
