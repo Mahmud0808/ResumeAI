@@ -6,11 +6,9 @@ import "react-quill/dist/quill.snow.css";
 
 const RichTextEditor = ({
   onRichTextEditorChange,
-  index,
   defaultValue,
 }: {
   onRichTextEditorChange: (value: any) => void;
-  index: number;
   defaultValue: string;
 }) => {
   const [value, setValue] = useState(defaultValue);

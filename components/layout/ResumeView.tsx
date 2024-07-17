@@ -59,7 +59,7 @@ const FinalResumeView = ({
                 </p>
               </>
             )}
-            <div className="flex justify-center gap-8 my-10">
+            <div className="flex max-sm:flex-col justify-center gap-8 my-10">
               <Button
                 className="flex px-12 py-6 gap-2 rounded-full bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-700/30 text-white"
                 onClick={handleDownload}

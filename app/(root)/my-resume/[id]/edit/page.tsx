@@ -1,7 +1,4 @@
-import React from "react";
-import ResumeEditForm from "@/components/layout/my-resume/ResumeEditForm";
-import ResumePreview from "@/components/layout/my-resume/ResumePreview";
-import { FormProvider } from "@/lib/context/FormProvider";
+import React, { use } from "react";
 import PageWrapper from "@/components/common/PageWrapper";
 import Header from "@/components/layout/Header";
 import { currentUser } from "@clerk/nextjs/server";
@@ -26,7 +23,7 @@ const EditResume = async ({ params }: { params: { id: string } }) => {
           Please provide the necessary information for your resume.
         </p>
       </div>
-      <ResumeEditor params={params} />
+      <ResumeEditor params={params} userId={user?.id} />
     </PageWrapper>
   );
 };

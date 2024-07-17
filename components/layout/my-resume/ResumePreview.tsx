@@ -13,7 +13,7 @@ const ResumePreview = () => {
   if (Object.keys(formData || {}).length === 0) {
     return (
       <div className="flex items-center justify-center">
-        <div className="w-[210mm] h-[297mm] rounded-sm shadow-lg skeleton" />
+        <div className="w-[210mm] min-h-[297mm] rounded-sm shadow-lg skeleton" />
       </div>
     );
   }
@@ -21,7 +21,7 @@ const ResumePreview = () => {
   return (
     <div className="flex items-center justify-center">
       <div
-        className="shadow-lg p-14 border-t-[20px] bg-white w-[210mm] h-[297mm] print:shadow-none"
+        className="shadow-lg p-14 border-t-[20px] bg-white w-[210mm] min-h-[297mm] print:shadow-none"
         style={{
           borderColor: formData?.themeColor || themeColors[0],
         }}

@@ -7,8 +7,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { generateEducationDescription } from "@/lib/actions/gemini.actions";
 import { addEducationToResume } from "@/lib/actions/resume.actions";
 import { useFormContext } from "@/lib/context/FormProvider";
-import { Brain, Loader2 } from "lucide-react";
-import React, { useRef, useState } from "react";
+import { Brain, Loader2, Minus, Plus } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 
 const EducationForm = ({ params }: { params: { id: string } }) => {
   const listRef = useRef<HTMLDivElement>(null);
@@ -36,6 +36,15 @@ const EducationForm = ({ params }: { params: { id: string } }) => {
     educationList.length - 1
   );
   const { toast } = useToast();
+
+  useEffect(() => {
+    educationList.forEach((education: any, index: number) => {
+      const textarea = document.getElementById(`description-${index}`) as any;
+      if (textarea) {
+        textarea.value = education.description;
+      }
+    });
+  }, [educationList]);
 
   const handleChange = (event: any, index: number) => {
     const newEntries = educationList.slice();
@@ -134,7 +143,7 @@ const EducationForm = ({ params }: { params: { id: string } }) => {
 
     setIsLoading(true);
 
-    const result = await addEducationToResume(params.id, educationList);
+    const result = await addEducationToResume(params.id, formData.education);
 
     if (result.success) {
       toast({
@@ -164,114 +173,111 @@ const EducationForm = ({ params }: { params: { id: string } }) => {
           Add your educational details
         </p>
 
-        <div>
-          {educationList.map((item: any, index: number) => (
-            <div key={index}>
-              <div className="grid grid-cols-2 gap-3 border p-3 my-5 rounded-lg">
-                <div className="col-span-2 space-y-2">
+        {educationList.map((item: any, index: number) => (
+          <div key={index}>
+            <div className="grid grid-cols-2 gap-3 border p-3 my-5 rounded-lg">
+              <div className="col-span-2 space-y-2">
+                <label className="text-slate-700 font-semibold">
+                  Name of Institute:
+                </label>
+                <Input
+                  name="universityName"
+                  onChange={(e) => handleChange(e, index)}
+                  defaultValue={item?.universityName}
+                  className="no-focus"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-slate-700 font-semibold">Degree:</label>
+                <Input
+                  name="degree"
+                  onChange={(e) => handleChange(e, index)}
+                  defaultValue={item?.degree}
+                  className="no-focus"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-slate-700 font-semibold">Major:</label>
+                <Input
+                  name="major"
+                  onChange={(e) => handleChange(e, index)}
+                  defaultValue={item?.major}
+                  className="no-focus"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-slate-700 font-semibold">
+                  Start Date:
+                </label>
+                <Input
+                  type="date"
+                  name="startDate"
+                  onChange={(e) => handleChange(e, index)}
+                  defaultValue={item?.startDate}
+                  className="no-focus"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-slate-700 font-semibold">
+                  End Date:
+                </label>
+                <Input
+                  type="date"
+                  name="endDate"
+                  onChange={(e) => handleChange(e, index)}
+                  defaultValue={item?.endDate}
+                  className="no-focus"
+                />
+              </div>
+              <div className="col-span-2 space-y-2">
+                <div className="flex justify-between items-end mt-2">
                   <label className="text-slate-700 font-semibold">
-                    Name of Institute:
+                    Description:
                   </label>
-                  <Input
-                    name="universityName"
-                    onChange={(e) => handleChange(e, index)}
-                    defaultValue={item?.universityName}
-                    className="no-focus"
-                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      generateEducationDescriptionFromAI(index);
+                    }}
+                    type="button"
+                    size="sm"
+                    className="border-primary text-primary flex gap-2"
+                    disabled={isAiLoading}
+                  >
+                    {isAiLoading && currentAiIndex === index ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Brain className="h-4 w-4" />
+                    )}{" "}
+                    Generate from AI
+                  </Button>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-slate-700 font-semibold">
-                    Degree:
-                  </label>
-                  <Input
-                    name="degree"
-                    onChange={(e) => handleChange(e, index)}
-                    defaultValue={item?.degree}
-                    className="no-focus"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-slate-700 font-semibold">Major:</label>
-                  <Input
-                    name="major"
-                    onChange={(e) => handleChange(e, index)}
-                    defaultValue={item?.major}
-                    className="no-focus"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-slate-700 font-semibold">
-                    Start Date:
-                  </label>
-                  <Input
-                    type="date"
-                    name="startDate"
-                    onChange={(e) => handleChange(e, index)}
-                    defaultValue={item?.startDate}
-                    className="no-focus"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-slate-700 font-semibold">
-                    End Date:
-                  </label>
-                  <Input
-                    type="date"
-                    name="endDate"
-                    onChange={(e) => handleChange(e, index)}
-                    defaultValue={item?.endDate}
-                    className="no-focus"
-                  />
-                </div>
-                <div className="col-span-2 space-y-2">
-                  <div className="flex justify-between items-end mt-2">
-                    <label className="text-slate-700 font-semibold">
-                      Description:
-                    </label>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        generateEducationDescriptionFromAI(index);
-                      }}
-                      type="button"
-                      size="sm"
-                      className="border-primary text-primary flex gap-2"
-                      disabled={isAiLoading}
-                    >
-                      {isAiLoading && currentAiIndex === index ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        <Brain className="h-4 w-4" />
-                      )}{" "}
-                      Generate from AI
-                    </Button>
-                  </div>
-                  <Textarea
-                    name="description"
-                    onChange={(e) => handleChange(e, index)}
-                    defaultValue={item?.description}
-                    className="no-focus"
-                  />
-                </div>
+                <Textarea
+                  id={`description-${index}`}
+                  name="description"
+                  onChange={(e) => handleChange(e, index)}
+                  defaultValue={item?.description || ""}
+                  className="no-focus"
+                />
               </div>
             </div>
-          ))}
-        </div>
-        <div className="mt-3 flex justify-between">
+          </div>
+        ))}
+        <div className="mt-3 flex gap-2 justify-between">
           <div className="flex gap-2">
             <Button
               variant="outline"
               onClick={AddNewEducation}
               className="text-primary"
             >
-              + Add More
+              <Plus className="size-4 mr-2" /> Add More
             </Button>
             <Button
               variant="outline"
               onClick={RemoveEducation}
               className="text-primary"
             >
-              - Remove
+              <Minus className="size-4 mr-2" /> Remove
             </Button>
           </div>
           <Button

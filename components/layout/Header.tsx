@@ -18,7 +18,7 @@ const Header = () => {
             </span>
           </Link>
           <div className="flex items-center lg:order-2">
-            {!user?.isSignedIn ? (
+            {user?.isLoaded && !user?.isSignedIn ? (
               <Link
                 href="/sign-in"
                 className="text-gray-800 hover:bg-primary-700/10 duration-300 focus:ring-4 focus:ring-primary-700/30 font-medium rounded-full text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 focus:outline-none"
@@ -26,9 +26,14 @@ const Header = () => {
                 Log in
               </Link>
             ) : (
-              <div className="mr-4 h-full items-center align-middle">
-                <UserButton showName={true} />
-              </div>
+              <>
+                <div className="mr-4 h-full items-center align-middle flex max-md:hidden justify-center">
+                  <UserButton showName={true} />
+                </div>
+                <div className="mr-4 h-full items-center align-middle hidden max-md:flex justify-center">
+                  <UserButton showName={false} />
+                </div>
+              </>
             )}
             <Link
               href={`${!user?.isSignedIn ? "/sign-up" : "/dashboard"}`}

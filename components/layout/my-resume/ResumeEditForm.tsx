@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Button } from "../../ui/button";
-import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import { redirect } from "next/navigation";
 import { useRouter } from "next-nprogress-bar";
 import PersonalDetailsForm from "./forms/PersonalDetailsForm";
@@ -11,10 +11,31 @@ import ExperienceForm from "./forms/ExperienceForm";
 import EducationForm from "./forms/EducationForm";
 import SkillsForm from "./forms/SkillsForm";
 import ThemeColor from "@/components/layout/ThemeColor";
+import { useToast } from "@/components/ui/use-toast";
+import { useFormContext } from "@/lib/context/FormProvider";
+import {
+  addEducationToResume,
+  addExperienceToResume,
+  addSkillToResume,
+  updateResume,
+} from "@/lib/actions/resume.actions";
 
-const ResumeEditForm = ({ params }: { params: { id: string } }) => {
+const ResumeEditForm = ({
+  params,
+  userId,
+}: {
+  params: { id: string };
+  userId: string | undefined;
+}) => {
+  if (!userId) {
+    return null;
+  }
+
   const router = useRouter();
+  const { toast } = useToast();
   const [activeFormIndex, setActiveFormIndex] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const { formData } = useFormContext();
 
   return (
     <div className="flex flex-col gap-5">
@@ -33,15 +54,89 @@ const ResumeEditForm = ({ params }: { params: { id: string } }) => {
           <Button
             className="flex gap-2 bg-primary-700 hover:bg-primary-800 text-white"
             size="sm"
-            onClick={() =>
-              activeFormIndex == 5
-                ? router.push("/my-resume/" + params.id + "/view")
-                : setActiveFormIndex(activeFormIndex + 1)
-            }
+            disabled={isLoading}
+            onClick={async () => {
+              if (activeFormIndex != 5) {
+                setActiveFormIndex(activeFormIndex + 1);
+              } else {
+                setIsLoading(true);
+
+                const updates = {
+                  firstName: formData?.firstName,
+                  lastName: formData?.lastName,
+                  jobTitle: formData?.jobTitle,
+                  address: formData?.address,
+                  phone: formData?.phone,
+                  email: formData?.email,
+                  summary: formData?.summary,
+                  experience: formData?.experience,
+                  education: formData?.education,
+                  skills: formData?.skills,
+                };
+
+                const updateResult = await updateResume({
+                  resumeId: params.id,
+                  updates: {
+                    firstName: updates.firstName,
+                    lastName: updates.lastName,
+                    jobTitle: updates.jobTitle,
+                    address: updates.address,
+                    phone: updates.phone,
+                    email: updates.email,
+                    summary: updates.summary,
+                  },
+                });
+
+                const experienceResult = await addExperienceToResume(
+                  params.id,
+                  updates.experience
+                );
+
+                const educationResult = await addEducationToResume(
+                  params.id,
+                  updates.education
+                );
+
+                const skillsResult = await addSkillToResume(
+                  params.id,
+                  updates.skills
+                );
+
+                setIsLoading(false);
+
+                if (
+                  updateResult.success &&
+                  experienceResult.success &&
+                  educationResult.success &&
+                  skillsResult.success
+                ) {
+                  router.push("/my-resume/" + params.id + "/view");
+                } else {
+                  toast({
+                    title: "Uh Oh! Something went wrong.",
+                    description:
+                      updateResult?.error ||
+                      experienceResult?.error ||
+                      educationResult?.error ||
+                      skillsResult?.error,
+                    variant: "destructive",
+                    className: "bg-white",
+                  });
+                }
+              }
+            }}
           >
             {activeFormIndex == 5 ? (
               <>
-                Finish <CheckCircle2 className="size-5" />
+                {isLoading ? (
+                  <>
+                    Finishing &nbsp; <Loader2 className="size-5 animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    Finish <CheckCircle2 className="size-5" />
+                  </>
+                )}
               </>
             ) : (
               <>

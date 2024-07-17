@@ -67,12 +67,13 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
       },
     });
   };
+
   const onSave = async (e: any) => {
     e.preventDefault();
 
     setIsLoading(true);
 
-    const result = await addSkillToResume(params.id, skillsList);
+    const result = await addSkillToResume(params.id, formData.skills);
 
     if (result.success) {
       toast({
@@ -127,21 +128,21 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
           </div>
         ))}
       </div>
-      <div className="mt-5 flex justify-between">
-        <div className="flex gap-3">
+      <div className="mt-5 flex gap-2 justify-between">
+        <div className="flex gap-2">
           <Button
             variant="outline"
             onClick={AddNewSkills}
             className="text-primary"
           >
-            <Plus size={20} className="mr-2" /> Add More
+            <Plus className="size-4 mr-2" /> Add More
           </Button>
           <Button
             variant="outline"
             onClick={RemoveSkills}
             className="text-primary"
           >
-            <Minus size={20} className="mr-2" /> Remove
+            <Minus className="size-4 mr-2" /> Remove
           </Button>
         </div>
         <Button
