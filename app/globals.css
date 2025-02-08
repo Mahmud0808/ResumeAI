@@ -72,8 +72,8 @@
 
 @layer components {
   :root {
-    --primary: rgb(67, 90, 218);
-    --secondary: #5ca3dd;
+    --primary: rgb(200, 123, 28);
+    --secondary: #dad843;
   }
 }
 

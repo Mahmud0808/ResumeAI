@@ -14,7 +14,7 @@ const Header = () => {
           <Link href="/" className="flex items-center">
             <img src="/icons/logo.svg" className="mr-3 h-7 sm:h-9" alt="logo" />
             <span className="self-center text-xl font-bold whitespace-nowrap">
-              ResumeAI
+              TalentSketch
             </span>
           </Link>
           <div className="flex items-center lg:order-2">
