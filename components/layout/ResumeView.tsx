@@ -8,7 +8,7 @@ import React from "react";
 import ResumePreview from "@/components/layout/my-resume/ResumePreview";
 import { usePathname } from "next/navigation";
 import PageWrapper from "@/components/common/PageWrapper";
-import { DownloadIcon, Share2Icon } from "lucide-react";
+import { DownloadIcon, Share2Icon , Mails } from "lucide-react";
 
 const FinalResumeView = ({
   params,
@@ -20,9 +20,16 @@ const FinalResumeView = ({
   const path = usePathname();
   const { formData } = useFormContext();
 
+  console.log(formData)
+
   const handleDownload = () => {
     window.print();
   };
+
+
+  const handleMotivationLetterClick = async () => {
+    console.log(await formData)
+  }
 
   return (
     <PageWrapper>
@@ -66,6 +73,12 @@ const FinalResumeView = ({
               >
                 <DownloadIcon className="size-6" /> Download
               </Button>
+              <Button
+                className="flex px-12 py-6 gap-2 rounded-full bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-700/30 text-white"
+                onClick={handleMotivationLetterClick}
+              >
+                <Mails className="size-6" /> Generate Motivation Letter
+              </Button>
               <RWebShare
                 data={{
                   text: "Hello everyone, check out my resume by clicking the link!",
@@ -78,6 +91,7 @@ const FinalResumeView = ({
                   <Share2Icon className="size-6" /> Share URL
                 </Button>
               </RWebShare>
+              
             </div>
           </div>
         </div>

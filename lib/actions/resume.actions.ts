@@ -5,6 +5,7 @@ import Education from "../models/education.model";
 import Experience from "../models/experience.model";
 import Resume from "../models/resume.model";
 import Skill from "../models/skill.model";
+import Project from "../models/project.model";
 import { connectToDB } from "../mongoose";
 import { revalidatePath } from "next/cache";
 
@@ -49,6 +50,10 @@ export async function fetchResume(resumeId: string) {
       .populate({
         path: "skills",
         model: Skill,
+      })
+      .populate({
+        path: "projects",
+        model: Project,
       });
 
     return JSON.stringify(resume);
@@ -249,6 +254,50 @@ export async function addSkillToResume(
     return { success: true, data: JSON.stringify(updatedResume) };
   } catch (error: any) {
     console.error("Error adding or updating skill to resume: ", error);
+    return { success: false, error: error?.message };
+  }
+}
+
+export async function addProjectsToResume(
+  resumeId: string,
+  projectsDataArray: any
+) {
+  try {
+    const resume = await Resume.findOne({ resumeId: resumeId });
+    console.log(projectsDataArray)
+
+    if (!resume) {
+      throw new Error("Resume not found");
+    }
+
+    const savedProjects = await Promise.all(
+      projectsDataArray.map(async (projectData: any) => {
+        console.log(projectData)
+        if (projectData._id) {
+          const existingProject = await Project.findById(
+            projectData._id
+          );
+          if (existingProject) {
+            return await Project.findByIdAndUpdate(
+              projectData._id,
+              projectData,
+              { new: true }
+            );
+          }
+        }
+        const newProject = new Project(projectData);
+        return await newProject.save();
+      })
+    );
+
+    const projectsIds = savedProjects.map((project) => project._id);
+    resume.projects = projectsIds;
+
+    const updatedResume = await resume.save();
+
+    return { success: true, data: JSON.stringify(updatedResume) };
+  } catch (error: any) {
+    console.error("Error adding or updating experience to resume: ", error);
     return { success: false, error: error?.message };
   }
 }

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { themeColors } from "../utils";
+import { MongoServerClosedError } from "mongodb";
 
 const resumeSchema = new mongoose.Schema({
   resumeId: { type: String, required: true, unique: true },
@@ -16,6 +17,7 @@ const resumeSchema = new mongoose.Schema({
   experience: [{ type: mongoose.Schema.Types.ObjectId, ref: "Experience" }],
   education: [{ type: mongoose.Schema.Types.ObjectId, ref: "Education" }],
   skills: [{ type: mongoose.Schema.Types.ObjectId, ref: "Skill" }],
+  projects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Project" }],
   themeColor: { type: String, default: themeColors[0] },
 });
 

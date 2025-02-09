@@ -5,10 +5,12 @@ import SkillsPreview from "./previews/SkillsPreview";
 import SummaryPreview from "./previews/SummaryPreview";
 import ExperiencePreview from "./previews/ExperiencePreview";
 import EducationalPreview from "./previews/EducationalPreview";
+import ProjectsPreview from "./previews/ProjectsPreview";
 import { themeColors } from "@/lib/utils";
 
 const ResumePreview = () => {
   const { formData } = useFormContext();
+  console.log(formData)
 
   if (Object.keys(formData || {}).length === 0) {
     return (
@@ -21,7 +23,7 @@ const ResumePreview = () => {
   return (
     <div className="flex items-center justify-center">
       <div
-        className="shadow-lg p-14 border-t-[20px] bg-white w-[210mm] min-h-[297mm] print:shadow-none"
+        className="shadow-lg p-14 bg-white w-[210mm] min-h-[297mm] print:shadow-none"
         style={{
           borderColor: formData?.themeColor || themeColors[0],
         }}
@@ -30,6 +32,7 @@ const ResumePreview = () => {
         <SummaryPreview />
         {formData?.experience?.length > 0 && <ExperiencePreview />}
         {formData?.education?.length > 0 && <EducationalPreview />}
+        {formData?.projects?.length > 0 && <ProjectsPreview />}
         {formData?.skills?.length > 0 && <SkillsPreview />}
       </div>
     </div>

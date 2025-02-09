@@ -10,6 +10,7 @@ import SummaryForm from "./forms/SummaryForm";
 import ExperienceForm from "./forms/ExperienceForm";
 import EducationForm from "./forms/EducationForm";
 import SkillsForm from "./forms/SkillsForm";
+import ProjectsForm from "./forms/ProjectsForm";
 import ThemeColor from "@/components/layout/ThemeColor";
 import { useToast } from "@/components/ui/use-toast";
 import { useFormContext } from "@/lib/context/FormProvider";
@@ -17,6 +18,7 @@ import {
   addEducationToResume,
   addExperienceToResume,
   addSkillToResume,
+  addProjectsToResume,
   updateResume,
 } from "@/lib/actions/resume.actions";
 
@@ -56,7 +58,7 @@ const ResumeEditForm = ({
             size="sm"
             disabled={isLoading}
             onClick={async () => {
-              if (activeFormIndex != 5) {
+              if (activeFormIndex != 6) {
                 setActiveFormIndex(activeFormIndex + 1);
               } else {
                 setIsLoading(true);
@@ -72,6 +74,7 @@ const ResumeEditForm = ({
                   experience: formData?.experience,
                   education: formData?.education,
                   skills: formData?.skills,
+                  projects : formData?.projects
                 };
 
                 const updateResult = await updateResume({
@@ -102,13 +105,20 @@ const ResumeEditForm = ({
                   updates.skills
                 );
 
+                const projectsResult = await addProjectsToResume(
+                  params.id,
+                  updates.projects
+                );
+
                 setIsLoading(false);
 
                 if (
                   updateResult.success &&
                   experienceResult.success &&
                   educationResult.success &&
-                  skillsResult.success
+                  skillsResult.success &&
+                  projectsResult.success
+
                 ) {
                   router.push("/my-resume/" + params.id + "/view");
                 } else {
@@ -118,7 +128,8 @@ const ResumeEditForm = ({
                       updateResult?.error ||
                       experienceResult?.error ||
                       educationResult?.error ||
-                      skillsResult?.error,
+                      skillsResult?.error ||
+                      projectsResult?.error,
                     variant: "destructive",
                     className: "bg-white",
                   });
@@ -126,7 +137,7 @@ const ResumeEditForm = ({
               }
             }}
           >
-            {activeFormIndex == 5 ? (
+            {activeFormIndex == 6 ? (
               <>
                 {isLoading ? (
                   <>
@@ -155,10 +166,15 @@ const ResumeEditForm = ({
       ) : activeFormIndex == 4 ? (
         <EducationForm params={params} />
       ) : activeFormIndex == 5 ? (
-        <SkillsForm params={params} />
+        <ProjectsForm params={params} />
       ) : activeFormIndex == 6 ? (
-        redirect("/my-resume/" + params.id + "/view")
-      ) : null}
+        <SkillsForm params={params} />
+      ) : activeFormIndex == 7 ?
+      redirect("/my-resume/" + params.id + "/view")
+      : null
+    }
+
+
     </div>
   );
 };
