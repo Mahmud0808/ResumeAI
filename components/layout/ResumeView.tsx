@@ -10,6 +10,7 @@ import { usePathname } from "next/navigation";
 import PageWrapper from "@/components/common/PageWrapper";
 import { DownloadIcon, Share2Icon } from "lucide-react";
 
+
 const FinalResumeView = ({
   params,
   isOwnerView,

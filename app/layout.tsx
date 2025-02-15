@@ -3,6 +3,7 @@ import { IBM_Plex_Serif, Inter, Nunito } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { ClerkProvider } from "@clerk/nextjs";
 import Providers from "@/components/common/ProgressBarProvider";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -32,10 +33,17 @@ export default function RootLayout({
         },
       }}
     >
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body className={`${inter.variable} ${nunito.variable} font-inter`}>
-          <Providers>{children}</Providers>
-          <Toaster />
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Providers>{children}</Providers>
+            <Toaster />
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>
