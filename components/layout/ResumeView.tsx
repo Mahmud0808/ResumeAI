@@ -20,15 +20,14 @@ const FinalResumeView = ({
   const path = usePathname();
   const { formData } = useFormContext();
 
-  console.log(formData)
 
   const handleDownload = () => {
     window.print();
   };
 
 
-  const handleMotivationLetterClick = async () => {
-    console.log(await formData)
+  const handleMotivationLetterClick = () => {
+    console.log(formData)
   }
 
   return (

@@ -10,7 +10,6 @@ import { themeColors } from "@/lib/utils";
 
 const ResumePreview = () => {
   const { formData } = useFormContext();
-  console.log(formData)
 
   if (Object.keys(formData || {}).length === 0) {
     return (

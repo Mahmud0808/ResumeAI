@@ -5,8 +5,7 @@ import React from "react";
 
 const ProjectsPreview = () => {
   const { formData } = useFormContext();
-  console.log(formData);
-
+  console.log(formData)
   return (
     <div className="my-6">
       <h2
@@ -60,11 +59,11 @@ const ProjectsPreview = () => {
           )}
 
           {/* Work Summary */}
-          {project?.workSummary && (
+          {project?.projectSummary && (
             <div
               className="text-xs my-2 form-preview"
               dangerouslySetInnerHTML={{
-                __html: project?.workSummary,
+                __html: project?.projectSummary,
               }}
             />
           )}

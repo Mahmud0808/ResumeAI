@@ -41,6 +41,8 @@ const ProjectsForm = ({ params }: { params: { id: string } }) => {
   const handleChange = (index: number, event: any) => {
     const newEntries = projectsList.slice();
     const { name, value } = event.target;
+
+    console.log(name, value)
     newEntries[index][name] = value;
     setProjectsList(newEntries);
 
@@ -60,7 +62,7 @@ const ProjectsForm = ({ params }: { params: { id: string } }) => {
         companyName: "",
         startDate: "",
         endDate: "",
-        workSummary: "",
+        projectSummary: "",
         githubRepo: "", // New field for GitHub repo link
 
       },
@@ -242,7 +244,7 @@ const ProjectsForm = ({ params }: { params: { id: string } }) => {
                     </Button>
                   </div>
                   <RichTextEditor
-                    defaultValue={item?.workSummary || ""}
+                    defaultValue={item?.projectSummary || ""}
                     onRichTextEditorChange={(value: string) =>
                       handleChange(index, value)
                     }
@@ -293,7 +295,7 @@ const ProjectsForm = ({ params }: { params: { id: string } }) => {
               key={index}
               onClick={() =>
                 handleChange(currentAiIndex, {
-                  target: { name: "workSummary", value: item?.description },
+                  target: { name: "projectSummary", value: item?.description },
                 })
               }
               className={`p-5 shadow-lg my-4 rounded-lg border-t-2 ${

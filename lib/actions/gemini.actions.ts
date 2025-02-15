@@ -66,3 +66,6 @@ export async function generateProjectDescription(projectInfo: string) {
 
   return JSON.parse(result);
 }
+
+
+
