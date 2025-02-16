@@ -87,6 +87,13 @@ const FinalResumeView = ({
       setGeneratedLetter(letter);
       setIsDialogOpen(false);
 
+    
+    const letterContent = JSON.parse(letter).motivation_letter
+
+
+
+      
+
       // Open in a new window with better formatting
       const newWindow = window.open();
       newWindow?.document.write(`
@@ -106,7 +113,7 @@ const FinalResumeView = ({
           </head>
           <body>
             <h2>Motivation Letter</h2>
-            <div style="white-space: pre-wrap;">${letter}</div>
+            <div style="white-space: pre-wrap;">${letterContent}</div>
           </body>
         </html>
       `);

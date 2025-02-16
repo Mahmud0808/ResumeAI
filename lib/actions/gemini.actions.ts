@@ -17,7 +17,7 @@ const generationConfig = {
   topP: 0.95,
   topK: 64,
   maxOutputTokens: 8192,
-  responseMimeType: "text/plain", // Change to text/plain
+  responseMimeType: "application/json", // Change to text/plain
 };
 
 async function askGemini(prompt: string) {
