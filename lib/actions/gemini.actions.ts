@@ -9,7 +9,7 @@ import {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
+  model: "gemini-2.0-flash",
 });
 
 const generationConfig = {
@@ -17,8 +17,7 @@ const generationConfig = {
   topP: 0.95,
   topK: 64,
   maxOutputTokens: 8192,
-  // responseMimeType: "text/plain",
-  responseMimeType: "application/json",
+  responseMimeType: "text/plain", // Change to text/plain
 };
 
 async function askGemini(prompt: string) {
@@ -58,3 +57,78 @@ export async function generateExperienceDescription(experienceInfo: string) {
 
   return JSON.parse(result);
 }
+
+export type MotivationLetterParams = {
+  cvText: string;
+  post: string;
+  companyName: string;
+};
+
+export const generateMotivationLetter = async ({
+  cvText,
+  post,
+  companyName,
+}: MotivationLetterParams): Promise<string> => {
+  try {
+    const prompt = `Write a professional motivation letter based on the following information:
+
+CV Information:
+${cvText}
+
+Position applying for: ${post}
+Company: ${companyName}
+
+Instructions:
+1. Write the letter in plain text format (not JSON)
+2. Use this structure:
+   [Today's Date]
+
+   [Company Name]
+   [Optional: Company Address]
+
+   Subject: Application for ${post} position
+
+   Dear Hiring Manager,
+
+   [Introduction paragraph]
+
+   [2-3 Body paragraphs]
+
+   [Closing paragraph]
+
+   Sincerely,
+   [Name from CV]
+
+3. Focus on relevant skills and experiences from the CV
+4. Keep it concise but impactful
+5. Use a professional and enthusiastic tone
+6. Do not include any JSON formatting or special markers
+7. Format as plain text with proper line breaks
+8. Do not include any placeholders or brackets
+
+Please write the complete letter now:`;
+
+    const result = await askGemini(prompt);
+
+    if (!result) {
+      throw new Error('No response received from Gemini API');
+    }
+
+    // Clean up any potential JSON formatting that might slip through
+    try {
+      const parsed = JSON.parse(result);
+      if (parsed.motivationLetter) {
+        const { introduction, body, conclusion } = parsed.motivationLetter;
+        return `${introduction}\n\n${body}\n\n${conclusion}`;
+      }
+    } catch {
+      // If parsing fails, it means it's already in plain text format
+      return result;
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Error in generateMotivationLetter:', error);
+    throw error;
+  }
+};
