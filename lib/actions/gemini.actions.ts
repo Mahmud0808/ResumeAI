@@ -81,7 +81,6 @@ Company: ${companyName}
 Instructions:
 1. Write the letter in plain text format (not JSON)
 2. Use this structure:
-   [Today's Date]
 
    [Company Name]
    [Optional: Company Address]
@@ -105,6 +104,7 @@ Instructions:
 6. Do not include any JSON formatting or special markers
 7. Format as plain text with proper line breaks
 8. Do not include any placeholders or brackets
+9. Don't let me complete any part of the letter
 
 Please write the complete letter now:`;
 
