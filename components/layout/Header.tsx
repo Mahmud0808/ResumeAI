@@ -3,7 +3,6 @@
 import { UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import React from "react";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const Header = () => {
   const user = useUser();
@@ -21,7 +20,6 @@ const Header = () => {
             </Link>
           </div>
           <div className="flex items-center gap-4">
-            <ThemeToggle />
             <div className="flex items-center lg:order-2">
               {user?.isLoaded && !user?.isSignedIn ? (
                 <Link

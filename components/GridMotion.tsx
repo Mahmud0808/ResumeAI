@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef, FC } from "react";
 import { gsap } from "gsap";
 import "./GridMotion.css";
@@ -13,7 +15,7 @@ const GridMotion: FC<GridMotionProps> = ({
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const mouseXRef = useRef<number>(window.innerWidth / 2);
+  const mouseXRef = useRef<number>(0); // Initialize to 0
 
   // Ensure the grid has 28 items (4 rows x 7 columns) by default
   const totalItems = 28;
@@ -25,6 +27,9 @@ const GridMotion: FC<GridMotionProps> = ({
     items.length > 0 ? items.slice(0, totalItems) : defaultItems;
 
   useEffect(() => {
+    // Initialize mouseXRef with window.innerWidth after component mounts
+    mouseXRef.current = window.innerWidth / 2;
+
     gsap.ticker.lagSmoothing(0);
 
     const handleMouseMove = (e: MouseEvent): void => {
@@ -89,7 +94,7 @@ const GridMotion: FC<GridMotionProps> = ({
                       style={{ backgroundColor: "#111" }}
                     >
                       {typeof content === "string" &&
-                      content.startsWith("http") ? (
+                        content.startsWith("http") ? (
                         <div
                           className="row__item-img"
                           style={{
