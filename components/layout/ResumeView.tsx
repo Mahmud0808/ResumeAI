@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { FormProvider, useFormContext } from "@/lib/context/FormProvider";
 import { RWebShare } from "react-web-share";
 import React from "react";
-import ResumePreview from "@/components/layout/my-resume/ResumePreview";
+import ResumePreview from "@/components/layout/my-resume/template_4/ResumePreview";
 import { usePathname } from "next/navigation";
 import PageWrapper from "@/components/common/PageWrapper";
 import { DownloadIcon, Share2Icon , Mails } from "lucide-react";

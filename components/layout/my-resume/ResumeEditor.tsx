@@ -3,7 +3,7 @@
 import { FormProvider } from "@/lib/context/FormProvider";
 import React from "react";
 import ResumeEditForm from "./ResumeEditForm";
-import ResumePreview from "./ResumePreview";
+import ResumePreview from "@/components/layout/my-resume/template_4/ResumePreview";
 
 const ResumeEditor = ({
   params,
