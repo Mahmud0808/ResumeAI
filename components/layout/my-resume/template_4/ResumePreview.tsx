@@ -6,7 +6,6 @@ import SummaryPreview from "@/components/layout/my-resume/template_4/previews/Su
 import ExperiencePreview from "@/components/layout/my-resume/template_4/previews/ExperiencePreview";
 import EducationalPreview from "@/components/layout/my-resume/template_4/previews/EducationalPreview";
 import ProjectsPreview from "@/components/layout/my-resume/template_4/previews/ProjectsPreview";
-import { themeColors } from "@/lib/utils";
 
 const ResumePreview = () => {
   const { formData } = useFormContext();

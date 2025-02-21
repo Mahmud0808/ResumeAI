@@ -1,11 +1,11 @@
 import { useFormContext } from "@/lib/context/FormProvider";
 import React from "react";
-import PersonalDetailsPreview from "@/components/layout/my-resume/template_1/previews/personal-details-preview";
-import SkillsPreview from "@/components/layout/my-resume/template_1/previews/skills-preview";
-import SummaryPreview from "@/components/layout/my-resume/template_1/previews/summary-preview";
-import ExperiencePreview from "@/components/layout/my-resume/template_1/previews/experience-preview";
-import EducationalPreview from "@/components/layout/my-resume/template_1/previews/educational-preview";
-import ProjectsPreview from "@/components/layout/my-resume/template_1/previews/projects-preview";
+import PersonalDetailsPreview from "@/components/layout/my-resume/template_2/previews/PersonalDetailsPreview";
+import SkillsPreview from "@/components/layout/my-resume/template_2/previews/SkillsPreview";
+import SummaryPreview from "@/components/layout/my-resume/template_2/previews/SummaryPreview";
+import ExperiencePreview from "@/components/layout/my-resume/template_2/previews/ExperiencePreview";
+import EducationalPreview from "@/components/layout/my-resume/template_2/previews/EducationalPreview";
+import ProjectsPreview from "@/components/layout/my-resume/template_2/previews/ProjectsPreview";
 import { themeColors } from "@/lib/utils";
 
 const ResumePreview = () => {

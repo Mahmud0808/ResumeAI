@@ -12,7 +12,7 @@ const ExperiencePreview = () => {
       style={{
         color: formData?.themeColor || themeColors[0],
         borderBottomColor: formData?.themeColor || themeColors[0],
-      }}>PROFESSIONAL EXPERIENCE</h3>
+      }}>PROFESSIONAL EXPERIENCES</h3>
       <div className="space-y-6">
         {formData?.experience?.map((experience: any, index: number) => (
           <div key={index} className="space-y-1">
