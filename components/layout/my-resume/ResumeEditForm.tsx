@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import { redirect } from "next/navigation";
@@ -21,6 +21,7 @@ import {
   addProjectsToResume,
   updateResume,
 } from "@/lib/actions/resume.actions";
+import TemplateSwitcher from "@/components/common/TemplateSwitcher";
 
 const ResumeEditForm = ({
   params,
@@ -39,10 +40,12 @@ const ResumeEditForm = ({
   const [isLoading, setIsLoading] = useState(false);
   const { formData } = useFormContext();
 
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex justify-between">
         <ThemeColor params={params} />
+        <TemplateSwitcher></TemplateSwitcher>
         <div className="flex gap-2">
           {activeFormIndex > 1 && (
             <Button

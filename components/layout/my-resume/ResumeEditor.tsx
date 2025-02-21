@@ -1,9 +1,10 @@
 "use client";
 
 import { FormProvider } from "@/lib/context/FormProvider";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ResumeEditForm from "./ResumeEditForm";
-import ResumePreview from "@/components/layout/my-resume/template_4/ResumePreview";
+import ResumeTemplateSelector from "@/components/layout/my-resume/ResumeTemplateSelector";
+
 
 const ResumeEditor = ({
   params,
@@ -16,7 +17,8 @@ const ResumeEditor = ({
     return null;
   }
 
-  const [selectedTemplate, setSelectedTemplate] = useState(4); // default template
+
+  // const [selectedTemplate, setSelectedTemplate] = useState(4); // default template
 
   return (
     <FormProvider params={params}>
@@ -25,10 +27,10 @@ const ResumeEditor = ({
           <ResumeEditForm
             params={params}
             userId={userId}
-            selectedTemplate={selectedTemplate}
-            setSelectedTemplate={setSelectedTemplate}
+            // selectedTemplate={selectedTemplate}
+            // setSelectedTemplate={setSelectedTemplate}
           />
-          <ResumePreview selectedTemplate={selectedTemplate} />
+          <ResumeTemplateSelector/>
         </div>
       </div>
     </FormProvider>

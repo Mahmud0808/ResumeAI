@@ -8,7 +8,7 @@ const SummaryPreview = () => {
   return (
     <div className="space-y-4">
       <h3 
-      className="font-semibold text-lg border-b-2 pb-1"
+      className="font-semibold text-lg border-b-2 pb-1 "
       style={{
         color: formData?.themeColor || themeColors[0],
         borderBottomColor: formData?.themeColor || themeColors[0],

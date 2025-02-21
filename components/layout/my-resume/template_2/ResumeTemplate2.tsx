@@ -8,7 +8,7 @@ import EducationalPreview from "@/components/layout/my-resume/template_2/preview
 import ProjectsPreview from "@/components/layout/my-resume/template_2/previews/ProjectsPreview";
 import { themeColors } from "@/lib/utils";
 
-const ResumePreview = () => {
+const ResumeTemplate2 = () => {
   const { formData } = useFormContext();
 
   if (Object.keys(formData || {}).length === 0) {
@@ -38,4 +38,4 @@ const ResumePreview = () => {
   );
 };
 
-export default ResumePreview;
+export default ResumeTemplate2;

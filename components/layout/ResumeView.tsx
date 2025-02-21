@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { FormProvider, useFormContext } from "@/lib/context/FormProvider";
 import { RWebShare } from "react-web-share";
 import React from "react";
-import ResumePreview from "@/components/layout/my-resume/template_2/ResumePreview";
+import ResumeTemplateSelector from "./my-resume/ResumeTemplateSelector";
 import { usePathname } from "next/navigation";
 import PageWrapper from "@/components/common/PageWrapper";
 import { DownloadIcon, Share2Icon , Mails } from "lucide-react";
@@ -96,7 +96,7 @@ const FinalResumeView = ({
         </div>
         <div className="px-10 pt-4 pb-16 max-sm:px-5 max-sm:pb-8 print:p-0">
           <div id="print-area">
-            <ResumePreview />
+            <ResumeTemplateSelector />
           </div>
         </div>
       </FormProvider>

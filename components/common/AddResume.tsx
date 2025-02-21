@@ -28,7 +28,6 @@ import {
 import { createResume } from "@/lib/actions/resume.actions";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next-nprogress-bar";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 const AddResume = ({ userId }: { userId: string | undefined }) => {
   const router = useRouter();
@@ -61,6 +60,10 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
       return;
     }
 
+
+
+    console.log(selectedTemplate)
+
     setIsLoading(true);
 
     const uuid = uuidv4();
@@ -69,7 +72,7 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
       resumeId: uuid,
       userId: userId,
       title: values.name,
-      template: selectedTemplate,
+      templateId: selectedTemplate,
     });
 
     if (result.success) {

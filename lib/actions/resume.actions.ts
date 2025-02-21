@@ -13,10 +13,12 @@ export async function createResume({
   resumeId,
   userId,
   title,
+  templateId
 }: {
   resumeId: string;
   userId: string;
   title: string;
+  templateId : Number;
 }) {
   try {
     await connectToDB();
@@ -25,6 +27,7 @@ export async function createResume({
       resumeId,
       userId,
       title,
+      templateId
     });
 
     return { success: true, data: JSON.stringify(newResume) };
@@ -108,6 +111,7 @@ export async function updateResume({
     email: string;
     summary: string;
     themeColor: string;
+    templateId: number;
   }>;
 }) {
   try {

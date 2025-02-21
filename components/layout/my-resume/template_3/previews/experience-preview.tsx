@@ -26,8 +26,9 @@ export default function ExperiencePreview() {
                   : experience.endDate}
               </p>
             </div>
-            <div className="list-disc pl-4 space-y-1 text-xs">
-                {experience?.workSummary}
+            <div className="list-disc pl-4 space-y-1 text-xs" dangerouslySetInnerHTML={{
+                __html: experience?.workSummary,
+              }}>
             </div>
           </div>
         ))}

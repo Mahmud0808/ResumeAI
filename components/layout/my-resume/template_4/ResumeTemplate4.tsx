@@ -7,7 +7,7 @@ import ExperiencePreview from "@/components/layout/my-resume/template_4/previews
 import EducationalPreview from "@/components/layout/my-resume/template_4/previews/EducationalPreview";
 import ProjectsPreview from "@/components/layout/my-resume/template_4/previews/ProjectsPreview";
 
-const ResumePreview = () => {
+const ResumeTemplate4 = () => {
   const { formData } = useFormContext();
 
   if (Object.keys(formData || {}).length === 0) {
@@ -19,7 +19,7 @@ const ResumePreview = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen w-100 bg-gray-100 flex items-center justify-center ">
       <div className="w-[210mm] min-h-[297mm] print:shadow-none bg-white shadow-lg">
         <PersonalDetailsPreview />
         <div className="grid md:grid-cols-2 gap-8 p-8">
@@ -38,4 +38,4 @@ const ResumePreview = () => {
   );
 };
 
-export default ResumePreview;
+export default ResumeTemplate4;

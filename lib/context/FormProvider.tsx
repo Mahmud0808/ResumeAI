@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect } from "react";
 import { createContext, useState, useContext } from "react";
-import { fetchResume } from "../actions/resume.actions";
+import { fetchResume , updateResume } from "../actions/resume.actions";
 
 const FormContext = createContext({} as any);
 
@@ -21,8 +21,9 @@ export const FormProvider = ({
       try {
         const resumeData = await fetchResume(params.id);
         const parsed = JSON.parse(resumeData);
+        console.log(parsed)
         setFormData(parsed);
-        setTemplate(parsed.template || 1);
+        setTemplate(parsed.templateId || 1);
       } catch (error) {
         console.error("Error fetching resume:", error);
       }
@@ -39,12 +40,20 @@ export const FormProvider = ({
     }));
   };
 
-  const changeTemplate = (templateNumber: number) => {
+  const changeTemplate = async (templateNumber: number) => {
     setTemplate(templateNumber);
     setFormData((prevData: any) => ({
       ...prevData,
-      template: templateNumber,
+      templateId: templateNumber,
     }));
+    const result = await updateResume({
+      resumeId: params.id,
+      updates: {
+        templateId: templateNumber,
+      },
+    });
+    
+
   };
 
   return (

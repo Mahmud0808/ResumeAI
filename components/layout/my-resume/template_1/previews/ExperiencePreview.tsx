@@ -43,7 +43,9 @@ export default function ExperiencePreview() {
                 {experience?.title}
               </div>
               <div 
-              className="text-gray-500 mt-1 text-sm">{experience?.workSummary}</div>
+              className="text-gray-500 mt-1 text-sm" dangerouslySetInnerHTML={{
+                __html: experience?.workSummary,
+              }}></div>
             </div>
           </div>
         ))}

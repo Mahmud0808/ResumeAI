@@ -110,13 +110,13 @@ const page = () => {
           <span className="text-sm text-gray-500 sm:text-center">
             © 2024{" "}
             <span className="hover:text-primary-500 hover:cursor-pointer">
-              ResumeAI™
+              TalentSketch
             </span>
             . All Rights Reserved.
           </span>
-          <Link href="https://github.com/Mahmud0808" className="me-4 md:me-6">
+          <Link href="https://github.com/zioder/talentsketch" className="me-4 md:me-6">
             <span className="hover:text-primary-500 mt-3 text-sm font-medium text-gray-500 sm:mt-0">
-              Made with ❤️ by Mahmud
+              Made with ❤️
             </span>
           </Link>
         </div>
