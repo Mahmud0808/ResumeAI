@@ -74,7 +74,7 @@ const ResumeEditForm = ({
                   experience: formData?.experience,
                   education: formData?.education,
                   skills: formData?.skills,
-                  projects : formData?.projects
+                  projects: formData?.projects
                 };
 
                 const updateResult = await updateResume({
@@ -170,9 +170,9 @@ const ResumeEditForm = ({
       ) : activeFormIndex == 6 ? (
         <SkillsForm params={params} />
       ) : activeFormIndex == 7 ?
-      redirect("/my-resume/" + params.id + "/view")
-      : null
-    }
+        redirect("/my-resume/" + params.id + "/view")
+        : null
+      }
 
 
     </div>

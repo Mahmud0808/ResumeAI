@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, PlusSquare } from "lucide-react";
+import { Loader2, PlusSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -28,11 +28,24 @@ import {
 import { createResume } from "@/lib/actions/resume.actions";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next-nprogress-bar";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 const AddResume = ({ userId }: { userId: string | undefined }) => {
   const router = useRouter();
   const [openDialog, setOpenDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(1);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev === 3 ? 0 : prev + 1));
+    setSelectedTemplate(currentSlide + 2 > 4 ? 1 : currentSlide + 2);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev === 0 ? 3 : prev - 1));
+    setSelectedTemplate(currentSlide === 0 ? 4 : currentSlide);
+  };
 
   const form = useForm({
     resolver: zodResolver(ResumeNameValidationSchema),
@@ -47,7 +60,7 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
     if (userId === undefined) {
       return;
     }
-    
+
     setIsLoading(true);
 
     const uuid = uuidv4();
@@ -56,6 +69,7 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
       resumeId: uuid,
       userId: userId,
       title: values.name,
+      template: selectedTemplate,
     });
 
     if (result.success) {
@@ -86,29 +100,74 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
       </div>
 
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Create New Resume</DialogTitle>
             <DialogDescription>
-              Enter the title of your resume here. Click create when you're
-              done.
+              Choose a template and enter the title of your resume.
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="comment-form"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="relative">
+                <div className="flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={prevSlide}
+                    className="absolute left-0 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+
+                  <div className="w-[300px] h-[400px] relative overflow-hidden">
+                    <div
+                      className="flex transition-transform duration-300 ease-in-out"
+                      style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                    >
+                      {[1, 2, 3, 4].map((template) => (
+                        <div
+                          key={template}
+                          className={`min-w-full px-2 ${selectedTemplate === template ? 'scale-105' : 'scale-100'
+                            } transition-transform duration-300`}
+                        >
+                          <div
+                            className={`rounded-lg p-2 cursor-pointer ${selectedTemplate === template
+                              ? 'border-blue-500 shadow-sm'
+                              : 'border-gray-200'
+                              }`}
+                            onClick={() => setSelectedTemplate(template)}
+                          >
+                            <img
+                              src={`/templates/template${template}.png`}
+                              alt={`Template ${template}`}
+                              className="w-full aspect-[1/1.4] object-cover rounded"
+                            />
+                            <div className="flex flex-col items-center mt-2">
+                              <p className="text-sm text-gray-500">Template</p>
+                              <p className="text-lg font-medium">{template}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={nextSlide}
+                    className="absolute right-0 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+              </div>
+
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      <p className="mt-2 mb-3 text-slate-700 font-semibold">
-                        Resume Title:
-                      </p>
-                    </FormLabel>
+                    <FormLabel>Resume Title:</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
@@ -122,6 +181,7 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
                   </FormItem>
                 )}
               />
+
               <div className="mt-10 flex justify-end gap-5">
                 <button
                   type="button"
