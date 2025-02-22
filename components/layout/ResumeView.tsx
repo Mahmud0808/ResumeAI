@@ -128,7 +128,6 @@ const FinalResumeView = ({
 
         // Format the content by adding proper line breaks and spacing
         const formattedContent = letterContent
-          .split('\n')
           .map((line: string) => line.trim())
           .filter((line: string | any[]) => line.length > 0)
           .join('\n\n');
