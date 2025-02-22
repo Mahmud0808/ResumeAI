@@ -53,7 +53,9 @@ const TemplateSwitcher = () => {
 
     return (
         <div className="flex items-center gap-2">
-            <Button onClick={() => setIsDialogOpen(true)}>Change Template</Button>
+            <Button
+                className="w-full bg-primary-900 hover:bg-primary-800 text-white"
+                onClick={() => setIsDialogOpen(true)}>Change Template</Button>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className='max-h-fit'>
