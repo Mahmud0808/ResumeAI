@@ -26,6 +26,8 @@
     "clsx": "^2.1.1",
     "draft-js": "^0.11.7",
     "embla-carousel-react": "^8.5.2",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.0",
     "lucide-react": "^0.408.0",
     "mongodb": "^6.8.0",
     "mongoose": "^8.9.5",
