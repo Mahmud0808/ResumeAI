@@ -27,7 +27,7 @@
 }
 
 .gridMotion-container {
-	gap: 1rem;
+	gap: 2rem;
 	flex: none;
 	position: relative;
 	width: 150vw;
@@ -38,23 +38,25 @@
 	transform: rotate(-15deg);
 	transform-origin: center center;
 	z-index: 2;
+	padding: 2rem;
 }
 
 .row {
 	display: grid;
-	gap: 1rem;
+	gap: 2rem;
 	grid-template-columns: repeat(7, 1fr);
 	will-change: transform, filter;
 }
 
 .row__item {
 	position: relative;
+	aspect-ratio: 1 / 1.4142; /* A4 aspect ratio */
+	min-height: 200px;
 }
 
 .row__item-inner {
-	position: relative;
-	width: 100%;
-	height: 100%;
+	position: absolute;
+	inset: 0;
 	overflow: hidden;
 	border-radius: 10px;
 	background-color: #111;
@@ -62,7 +64,7 @@
 	align-items: center;
 	justify-content: center;
 	color: white;
-	font-size: 1.5rem;
+	font-size: clamp(0.8rem, 1.5vw, 1.5rem);
 }
 
 .row__item-img {
@@ -79,6 +81,11 @@
 	padding: 1rem;
 	text-align: center;
 	z-index: 1;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .fullview {
