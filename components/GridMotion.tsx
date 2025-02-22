@@ -83,9 +83,7 @@ const GridMotion: FC<GridMotionProps> = ({
             <div
               key={rowIndex}
               className="row"
-              ref={(el: HTMLDivElement | null): void => {
-                rowRefs.current[rowIndex] = el;
-              }} // Set each row's ref
+              ref={(el) => { rowRefs.current[rowIndex] = el }} // Set each row's ref
             >
               {Array.from({ length: 7 }, (_, itemIndex) => {
                 const content = combinedItems[rowIndex * 7 + itemIndex];
