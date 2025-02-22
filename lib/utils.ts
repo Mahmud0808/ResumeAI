@@ -21,4 +21,5 @@ export const themeColors = [
   "#7986CB", // Light Indigo
   "#FFD54F", // Light Amber
   "#FFEB3B", // Bright Yellow
+  "#000000" 
 ];

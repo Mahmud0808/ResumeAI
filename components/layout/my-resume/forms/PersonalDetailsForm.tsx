@@ -47,6 +47,8 @@ const PersonalDetailsForm = ({ params }: { params: { id: string } }) => {
       });
     }
 
+    console.log(formData)
+
     setIsLoading(false);
   };
 

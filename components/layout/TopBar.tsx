@@ -16,7 +16,7 @@ const TopBar = () => {
       <Link href="/" className="flex gap-2 items-center">
         <Image src="/icons/logo.svg" alt="logo" width={58} height={58} />
         <p className="text-4xl font-nunito font-extrabold text-slate-800">
-          ResumeAI
+          TalentSketch
         </p>
       </Link>
 

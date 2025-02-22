@@ -43,7 +43,7 @@ const RichTextEditor = ({
       modules={modules}
       onChange={(e: any) => {
         setValue(e);
-        onRichTextEditorChange({ target: { name: "workSummary", value: e } });
+        onRichTextEditorChange({ target: { name: "projectSummary", value: e } });
       }}
       className="mt-2"
       style={{ borderColor: "#E5E7EB" }}
