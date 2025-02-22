@@ -36,6 +36,7 @@ const FinalResumeView = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [capturedCVContent, setCapturedCVContent] = useState<string>('');
   const printAreaRef = useRef<HTMLDivElement>(null);
+  const resumeContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (setFormData) {
@@ -44,14 +45,37 @@ const FinalResumeView = ({
   }, [post, companyName, formData, setFormData]);
 
   const captureResumeContent = () => {
-    if (printAreaRef.current) {
-      const content = printAreaRef.current.innerText;
-      console.log('Captured CV content:', content);
-      setCapturedCVContent(content);
-      return content;
+    if (resumeContentRef.current) {
+      try {
+        // Get all text content excluding buttons and UI elements
+        const content = Array.from(resumeContentRef.current.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, div'))
+          .map(element => element.textContent)
+          .filter(text => text && text.trim().length > 0)
+          .join('\n');
+
+        if (!content || content.trim().length === 0) {
+          console.error('No content captured from resume');
+          return '';
+        }
+
+        console.log('Captured CV content:', content);
+        setCapturedCVContent(content);
+        return content;
+      } catch (error) {
+        console.error('Error capturing resume content:', error);
+        return '';
+      }
     }
     return '';
   };
+
+  // Use useEffect to capture content when component mounts
+  useEffect(() => {
+    const content = captureResumeContent();
+    if (content) {
+      setCapturedCVContent(content);
+    }
+  }, []);
 
   const generateLetter = async () => {
     try {
@@ -64,56 +88,130 @@ const FinalResumeView = ({
       const button = document.querySelector('[data-generate-button]');
       if (button) button.textContent = 'Generating...';
 
-      // Use captured content if available, otherwise try to capture it now
       const cvContent = capturedCVContent || captureResumeContent();
 
       if (!cvContent.trim()) {
         throw new Error('Could not capture resume content');
       }
 
-      const letter = await generateMotivationLetter({
+      const response = await generateMotivationLetter({
         cvText: cvContent,
         post,
         companyName,
       });
 
-      if (!letter) {
+      console.log('Raw API Response:', response); // Debug log
+
+      if (!response) {
         throw new Error('No response received from the API');
       }
 
-      setGeneratedLetter(letter);
-      setIsDialogOpen(false);
+      let letterContent;
+      try {
+        // If response is a string, try to parse it
+        if (typeof response === 'string') {
+          try {
+            const parsedResponse = JSON.parse(response);
+            letterContent = parsedResponse.motivation_letter || parsedResponse;
+          } catch {
+            // If JSON parsing fails, use the string directly
+            letterContent = response;
+          }
+        } else if (typeof response === 'object') {
+          // If response is already an object, extract the letter
+          letterContent = response.motivation_letter || JSON.stringify(response, null, 2);
+        } else {
+          letterContent = String(response);
+        }
 
+        console.log('Processed Letter Content:', letterContent); // Debug log
 
-      const letterContent = JSON.parse(letter).motivation_letter
+        // Format the content by adding proper line breaks and spacing
+        const formattedContent = letterContent
+          .split('\n')
+          .map((line: string) => line.trim())
+          .filter((line: string | any[]) => line.length > 0)
+          .join('\n\n');
 
+        // Open in a new window with improved formatting
+        const newWindow = window.open();
+        if (!newWindow) {
+          throw new Error('Could not open new window');
+        }
 
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>Motivation Letter</title>
+              <style>
+                body { 
+                  font-family: 'Arial', sans-serif;
+                  line-height: 1.8;
+                  max-width: 800px;
+                  margin: 40px auto;
+                  padding: 20px;
+                  background-color: #f9fafb;
+                  color: #1f2937;
+                }
+                .container {
+                  background-color: white;
+                  padding: 2.5rem;
+                  border-radius: 8px;
+                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                }
+                h1 {
+                  color: #2563eb;
+                  font-size: 1.5rem;
+                  margin-bottom: 2rem;
+                  text-align: center;
+                }
+                .letter-content {
+                  white-space: pre-wrap;
+                  text-align: justify;
+                }
+                .letter-content p {
+                  margin-bottom: 1rem;
+                }
+                .meta-info {
+                  margin-bottom: 2rem;
+                  color: #4b5563;
+                }
+                @media print {
+                  body {
+                    background: white;
+                  }
+                  .container {
+                    box-shadow: none;
+                    padding: 0;
+                  }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h1>Motivation Letter</h1>
+                <div class="meta-info">
+                  <strong>Position:</strong> ${post}<br>
+                  <strong>Company:</strong> ${companyName}
+                </div>
+                <div class="letter-content">
+                  ${formattedContent}
+                </div>
+              </div>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
 
+        setGeneratedLetter(letterContent);
+        setIsDialogOpen(false);
 
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        console.error('Raw response:', response);
+        throw new Error('Failed to parse the generated letter');
+      }
 
-      // Open in a new window with better formatting
-      const newWindow = window.open();
-      newWindow?.document.write(`
-        <html>
-          <head>
-            <title>Motivation Letter</title>
-            <style>
-              body { 
-                font-family: Arial, sans-serif;
-                line-height: 1.6;
-                max-width: 800px;
-                margin: 40px auto;
-                padding: 20px;
-              }
-              h2 { color: #2563eb; }
-            </style>
-          </head>
-          <body>
-            <h2>Motivation Letter</h2>
-            <div style="white-space: pre-wrap;">${letterContent}</div>
-          </body>
-        </html>
-      `);
     } catch (error) {
       console.error("Error details:", error);
       alert("Failed to generate motivation letter. Please try again. Error: " + (error as Error).message);
@@ -240,7 +338,7 @@ const FinalResumeView = ({
                   </div>
                   <Button
                     onClick={generateLetter}
-                    className="w-full"
+                    className="w-full bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-700/30 text-white"
                     data-generate-button
                   >
                     Generate Letter
@@ -267,6 +365,7 @@ const FinalResumeView = ({
         <div className="px-10 pt-4 pb-16 max-sm:px-5 max-sm:pb-8 print:p-0">
           <div
             id="print-area"
+            ref={resumeContentRef}
             className="w-[21cm] mx-auto" // Fixed width of A4 and center horizontally
             style={{
               marginLeft: 'auto',
