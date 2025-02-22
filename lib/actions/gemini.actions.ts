@@ -117,6 +117,7 @@ Please write the complete letter now:`;
     // Clean up any potential JSON formatting that might slip through
     try {
       const parsed = JSON.parse(result);
+      
       if (parsed.motivationLetter) {
         const { introduction, body, conclusion } = parsed.motivationLetter;
         return `${introduction}\n\n${body}\n\n${conclusion}`;

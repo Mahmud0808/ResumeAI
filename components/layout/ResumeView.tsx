@@ -100,7 +100,8 @@ const FinalResumeView = ({
         companyName,
       });
 
-      console.log('Raw API Response:', response); // Debug log
+      
+    
 
       if (!response) {
         throw new Error('No response received from the API');
@@ -112,26 +113,38 @@ const FinalResumeView = ({
         if (typeof response === 'string') {
           try {
             const parsedResponse = JSON.parse(response);
-            letterContent = parsedResponse.motivation_letter || parsedResponse;
+          
+            letterContent = parsedResponse.motivation_letter||parsedResponse[0].letter || parsedResponse ;
           } catch {
             // If JSON parsing fails, use the string directly
             letterContent = response;
           }
         } else if (typeof response === 'object' && response !== null) {
           // If response is already an object, extract the letter
-          letterContent = (response as { motivation_letter?: string }).motivation_letter || JSON.stringify(response, null, 2);
+          letterContent = (response as { letter?: string }).letter || JSON.stringify(response, null, 2);
         } else {
           letterContent = String(response);
         }
 
-        console.log('Processed Letter Content:', letterContent); // Debug log
+        //console.log('Processed Letter Content:', letterContent); // Debug log
 
         // Format the content by adding proper line breaks and spacing
-        const formattedContent = letterContent
-          .map((line: string) => line.trim())
-          .filter((line: string | any[]) => line.length > 0)
-          .join('\n\n');
+        const formattedContent = Array.isArray(letterContent)
+        ? letterContent
+            .map((line: string) => line.trim())  // Trim each line in the array
+            .filter((line: string) => line.length > 0)  // Filter out empty lines
+            .join('\n')  // Join them into a single string with newlines between each line
+        : letterContent
+            .split('\n')  // If it's a string, split by newlines
+            .map((line: string) => line.trim())  // Trim each line
+            .filter((line: string | any[]) => line.length > 0)  // Filter out empty lines
+            .join('\n\n');  // Join with two newlines between each line
+      
+    //  console.log(formattedContent);  // Output the formatted content
+      
+        
 
+       // console.log("formattedccc",formattedContent);
         // Open in a new window with improved formatting
         const newWindow = window.open();
         if (!newWindow) {
