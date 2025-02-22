@@ -117,9 +117,9 @@ const FinalResumeView = ({
             // If JSON parsing fails, use the string directly
             letterContent = response;
           }
-        } else if (typeof response === 'object') {
+        } else if (typeof response === 'object' && response !== null) {
           // If response is already an object, extract the letter
-          letterContent = response.motivation_letter || JSON.stringify(response, null, 2);
+          letterContent = (response as { motivation_letter?: string }).motivation_letter || JSON.stringify(response, null, 2);
         } else {
           letterContent = String(response);
         }
