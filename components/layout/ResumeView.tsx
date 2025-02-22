@@ -1,13 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Mails, Share2Icon, DownloadIcon } from "lucide-react";
 import { FormProvider, useFormContext } from "@/lib/context/FormProvider";
-import { usePathname } from "next/navigation";
-import PageWrapper from "@/components/common/PageWrapper";
 import Header from "@/components/layout/Header";
 import React, { useState, useEffect, useRef } from "react";
-import ResumePreview from "@/components/layout/my-resume/ResumePreview";
 import { RWebShare } from "react-web-share";
 import { generateMotivationLetter } from "@/lib/actions/gemini.actions";
 import {
@@ -19,6 +15,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import ResumeTemplateSelector from "./my-resume/ResumeTemplateSelector";
+import { usePathname } from "next/navigation";
+import PageWrapper from "@/components/common/PageWrapper";
+import { DownloadIcon, Share2Icon, Mails } from "lucide-react";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const FinalResumeView = ({
   params,
@@ -49,11 +51,6 @@ const FinalResumeView = ({
       return content;
     }
     return '';
-  };
-
-  const handleDownload = () => {
-    captureResumeContent();
-    window.print();
   };
 
   const generateLetter = async () => {
@@ -87,12 +84,12 @@ const FinalResumeView = ({
       setGeneratedLetter(letter);
       setIsDialogOpen(false);
 
-    
-    const letterContent = JSON.parse(letter).motivation_letter
+
+      const letterContent = JSON.parse(letter).motivation_letter
 
 
 
-      
+
 
       // Open in a new window with better formatting
       const newWindow = window.open();
@@ -128,6 +125,54 @@ const FinalResumeView = ({
   };
 
   const path = usePathname();
+  const handleDownload = async () => {
+    const element = document.getElementById('print-area');
+    if (!element) return;
+
+    try {
+      // Set canvas width to match A4 proportion (roughly 1:1.414)
+      const a4Width = 793;  // roughly A4 width at 96 DPI
+      const a4Height = 1122; // roughly A4 height at 96 DPI
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        width: a4Width,
+        height: a4Height
+      });
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'pt',
+        format: 'a4'
+      });
+
+      // Get PDF dimensions in points (pt)
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      pdf.addImage(
+        canvas.toDataURL('image/png'),
+        'PNG',
+        0,
+        0,
+        pageWidth,
+        pageHeight,
+        undefined,
+        'FAST'
+      );
+
+      pdf.save(`${formData?.firstName || 'Resume'}_${formData?.lastName || ''}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
+
+  const handleMotivationLetterClick = () => {
+    console.log(formData)
+  }
 
   return (
     <PageWrapper>
@@ -141,8 +186,8 @@ const FinalResumeView = ({
                   Congrats! Your ultimate AI-generated resume is ready!
                 </h2>
                 <p className="text-center text-gray-600">
-                  You can now download your resume or generate a motivation
-                  letter.
+                  You can now download your resume or share its unique URL with
+                  your friends and family.
                 </p>
               </>
             ) : (
@@ -215,12 +260,22 @@ const FinalResumeView = ({
                   <Share2Icon className="size-6" /> Share URL
                 </Button>
               </RWebShare>
+
             </div>
           </div>
         </div>
         <div className="px-10 pt-4 pb-16 max-sm:px-5 max-sm:pb-8 print:p-0">
-          <div id="print-area" ref={printAreaRef}>
-            <ResumePreview />
+          <div
+            id="print-area"
+            className="w-[21cm] mx-auto" // Fixed width of A4 and center horizontally
+            style={{
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              display: 'flex',
+              justifyContent: 'flex-start' // Align content to start from left
+            }}
+          >
+            <ResumeTemplateSelector />
           </div>
         </div>
       </FormProvider>

@@ -4,16 +4,15 @@ import React from "react";
 
 const SkillsPreview = () => {
   const { formData } = useFormContext();
-
+  
   return (
     <div className="my-6">
       <h2
         className="text-center font-bold text-sm mb-2"
         style={{
           color: formData?.themeColor || themeColors[0],
-        }}
-      >
-        Skill{formData?.skills.length > 1 ? "s" : ""}
+        }}>
+        Skills
       </h2>
       <hr
         style={{
@@ -34,8 +33,8 @@ const SkillsPreview = () => {
                 style={{
                   backgroundColor: formData?.themeColor || themeColors[0],
                   width: (skill?.rating || 1) * 20 + "%",
-                }}
-              ></div>
+                }}>
+            </div>
             </div>
           </div>
         ))}

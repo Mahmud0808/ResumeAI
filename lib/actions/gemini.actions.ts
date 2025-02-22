@@ -132,3 +132,13 @@ Please write the complete letter now:`;
     throw error;
   }
 };
+
+export async function generateProjectDescription(projectInfo: string) {
+  const prompt = `Given a brief description of a project: ${projectInfo}, provide a summary of three levels of activities I performed during the project, preferably as a list: High Activity, Medium Activity, and Low Activity. Each summary should be 3-4 lines long and written from my perspective, reflecting on my contributions and involvement in the project. The output should be an array of JSON objects, each containing 'activity_level' and 'description' fields. You can include <b>, <i>, <u>, <s>, <blockquote>, <ul>, <ol>, and <li> to further enhance the descriptions. Additionally, include sample technologies that could have been used in the project, to provide context for the activities.`;
+  const result = await askGemini(prompt);
+
+  return JSON.parse(result);
+}
+
+
+
