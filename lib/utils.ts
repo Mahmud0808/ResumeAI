@@ -22,3 +22,7 @@ export const themeColors = [
   "#FFD54F", // Light Amber
   "#FFEB3B", // Bright Yellow
 ];
+
+export const stripHtml = (html: string): string => {
+  return html.replace(/<[^>]*>/g, "").trim();
+};

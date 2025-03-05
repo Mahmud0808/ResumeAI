@@ -47,7 +47,7 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
     if (userId === undefined) {
       return;
     }
-    
+
     setIsLoading(true);
 
     const uuid = uuidv4();

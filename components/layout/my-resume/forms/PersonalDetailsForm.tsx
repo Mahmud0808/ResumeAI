@@ -1,36 +1,63 @@
 "use client";
 
 import { useFormContext } from "@/lib/context/FormProvider";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "../../../ui/input";
 import { Button } from "../../../ui/button";
 import { Loader2 } from "lucide-react";
 import { updateResume } from "@/lib/actions/resume.actions";
 import { useToast } from "@/components/ui/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { PersonalDetailValidationSchema } from "@/lib/validations/resume";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { personalDetailFields } from "@/lib/fields";
 
 const PersonalDetailsForm = ({ params }: { params: { id: string } }) => {
   const { formData, handleInputChange } = useFormContext();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const onSave = async (e: any) => {
-    e.preventDefault();
+  const form = useForm<z.infer<typeof PersonalDetailValidationSchema>>({
+    resolver: zodResolver(PersonalDetailValidationSchema),
+    mode: "onChange",
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      jobTitle: "",
+      address: "",
+      phone: "",
+      email: "",
+    },
+  });
 
+  useEffect(() => {
+    if (formData && Object.keys(formData).length > 0) {
+      form.reset({
+        firstName: formData?.firstName || "",
+        lastName: formData?.lastName || "",
+        jobTitle: formData?.jobTitle || "",
+        address: formData?.address || "",
+        phone: formData?.phone || "",
+        email: formData?.email || "",
+      });
+    }
+  }, [formData, form]);
+
+  const onSave = async (
+    data: z.infer<typeof PersonalDetailValidationSchema>
+  ) => {
     setIsLoading(true);
-
-    const updates = {
-      firstName: formData?.firstName,
-      lastName: formData?.lastName,
-      jobTitle: formData?.jobTitle,
-      address: formData?.address,
-      phone: formData?.phone,
-      email: formData?.email,
-    };
-
-    const result = await updateResume({
-      resumeId: params.id,
-      updates: updates,
-    });
+    const updates = { ...data };
+    const result = await updateResume({ resumeId: params.id, updates });
 
     if (result.success) {
       toast({
@@ -46,7 +73,6 @@ const PersonalDetailsForm = ({ params }: { params: { id: string } }) => {
         className: "bg-white",
       });
     }
-
     setIsLoading(false);
   };
 
@@ -59,93 +85,58 @@ const PersonalDetailsForm = ({ params }: { params: { id: string } }) => {
         Get Started with the basic information
       </p>
 
-      <form onSubmit={onSave}>
-        <div className="grid grid-cols-2 mt-5 gap-3">
-          <div className="space-y-2">
-            <label className="mt-2 text-slate-700 font-semibold">
-              First Name:
-            </label>
-            <Input
-              name="firstName"
-              defaultValue={formData?.firstName}
-              required
-              onChange={handleInputChange}
-              className="no-focus"
-            />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSave)}>
+          <div className="grid grid-cols-2 mt-5 gap-3">
+            {personalDetailFields.map((field) => (
+              <FormField
+                key={field.name}
+                control={form.control}
+                name={field.name}
+                render={({ field: formField }) => (
+                  <FormItem className={field.fullWidth ? "col-span-2" : ""}>
+                    <FormLabel className="text-slate-700 font-semibold text-md">
+                      {field.label}:
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type={field.type}
+                        className={`no-focus ${
+                          form.formState.errors[field.name]
+                            ? "error"
+                            : "border-gray-300 bg-white"
+                        }`}
+                        autoComplete="off"
+                        {...formField}
+                        onChange={(e) => {
+                          formField.onChange(e);
+                          handleInputChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ))}
           </div>
-          <div className="space-y-2">
-            <label className="mt-2 text-slate-700 font-semibold">
-              Last Name:
-            </label>
-            <Input
-              name="lastName"
-              required
-              onChange={handleInputChange}
-              defaultValue={formData?.lastName}
-              className="no-focus"
-            />
+
+          <div className="mt-5 flex justify-end gap-5">
+            <Button
+              type="submit"
+              disabled={!form.formState.isValid || form.formState.isSubmitting}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" /> &nbsp; Saving
+                </>
+              ) : (
+                "Save"
+              )}
+            </Button>
           </div>
-          <div className="col-span-2 space-y-2">
-            <label className="mt-2 text-slate-700 font-semibold">
-              Job Title:
-            </label>
-            <Input
-              name="jobTitle"
-              required
-              onChange={handleInputChange}
-              defaultValue={formData?.jobTitle}
-              className="no-focus"
-            />
-          </div>
-          <div className="col-span-2 space-y-2">
-            <label className="mt-2 text-slate-700 font-semibold">
-              Address:
-            </label>
-            <Input
-              name="address"
-              required
-              defaultValue={formData?.address}
-              onChange={handleInputChange}
-              className="no-focus"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="mt-2 text-slate-700 font-semibold">Phone:</label>
-            <Input
-              name="phone"
-              required
-              defaultValue={formData?.phone}
-              onChange={handleInputChange}
-              className="no-focus"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="mt-2 text-slate-700 font-semibold">Email:</label>
-            <Input
-              name="email"
-              required
-              defaultValue={formData?.email}
-              onChange={handleInputChange}
-              className="no-focus"
-            />
-          </div>
-        </div>
-        <div className="mt-5 flex justify-end">
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="bg-primary-700 hover:bg-primary-800 text-white"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 size={20} className="animate-spin" /> &nbsp; Saving
-              </>
-            ) : (
-              "Save"
-            )}
-          </Button>
-        </div>
-      </form>
+        </form>
+      </Form>
     </div>
   );
 };

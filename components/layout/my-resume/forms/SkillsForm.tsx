@@ -1,85 +1,96 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormContext } from "@/lib/context/FormProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Rating } from "@smastrom/react-rating";
 import { Loader2, Minus, Plus } from "lucide-react";
 import "@smastrom/react-rating/style.css";
-import { addSkillToResume, updateResume } from "@/lib/actions/resume.actions";
+import { addSkillToResume } from "@/lib/actions/resume.actions";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { SkillValidationSchema } from "@/lib/validations/resume";
+import { useState } from "react";
+import { z } from "zod";
 
 const SkillsForm = ({ params }: { params: { id: string } }) => {
   const { formData, handleInputChange } = useFormContext();
-  const [skillsList, setSkillsList] = useState(
-    formData.skills.length > 0
-      ? formData.skills
-      : [
-          {
-            name: "",
-            rating: 1,
-          },
-        ]
-  );
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleChange = (index: number, name: string, value: any) => {
-    const newSkillsList = [...skillsList];
-    newSkillsList[index][name] = value;
-    setSkillsList(newSkillsList);
+  const form = useForm<z.infer<typeof SkillValidationSchema>>({
+    resolver: zodResolver(SkillValidationSchema),
+    mode: "onChange",
+    defaultValues: {
+      skills:
+        formData?.skills?.length > 0
+          ? formData.skills
+          : [
+              {
+                name: "",
+                rating: 1,
+              },
+            ],
+    },
+  });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "skills",
+  });
+
+  const handleChange = (
+    index: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value } = event.target;
+    const newEntries = form.getValues("skills").slice();
+    newEntries[index] = { ...newEntries[index], [name]: value };
     handleInputChange({
       target: {
         name: "skills",
-        value: newSkillsList,
+        value: newEntries,
       },
     });
   };
 
-  const AddNewSkills = () => {
-    const newSkillsList = [
-      ...skillsList,
-      {
-        name: "",
-        rating: 1,
-      },
-    ];
-    setSkillsList(newSkillsList);
-
+  const handleRatingChange = (index: number, value: number) => {
+    const newEntries = form.getValues("skills").slice();
+    newEntries[index] = { ...newEntries[index], rating: value };
     handleInputChange({
       target: {
         name: "skills",
-        value: newSkillsList,
+        value: newEntries,
       },
     });
   };
 
-  const RemoveSkills = () => {
-    const newSkillsList = skillsList.slice(0, -1);
-    setSkillsList(newSkillsList);
-
-    handleInputChange({
-      target: {
-        name: "skills",
-        value: newSkillsList,
-      },
-    });
-  };
-
-  const onSave = async (e: any) => {
-    e.preventDefault();
-
+  const onSave = async () => {
     setIsLoading(true);
 
-    const result = await addSkillToResume(params.id, formData.skills);
+    const skillsData = form.getValues("skills");
+    const result = await addSkillToResume(params.id, skillsData);
 
     if (result.success) {
       toast({
         title: "Information saved.",
         description: "Skill sets updated successfully.",
         className: "bg-white",
+      });
+      handleInputChange({
+        target: {
+          name: "skills",
+          value: skillsData,
+        },
       });
     } else {
       toast({
@@ -102,63 +113,96 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
         Add Your top professional key skills
       </p>
 
-      <div className="mt-5">
-        {skillsList.map((item: any, index: number) => (
-          <div
-            key={index}
-            className="flex max-lg:flex-col lg:items-end justify-between mb-2 border rounded-lg p-3 space-y-2 lg:space-x-12"
-          >
-            <div className="space-y-2 w-full">
-              <label className="mt-2 text-slate-700 font-semibold">Name:</label>
-              <Input
-                className="no-focus mt-2"
-                defaultValue={item.name}
-                onChange={(e: any) =>
-                  handleChange(index, "name", e.target.value)
-                }
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSave)} className="mt-5">
+          {fields.map((item, index) => (
+            <div
+              key={item.id}
+              className={`flex max-lg:flex-col ${
+                form.formState.errors.skills?.[index]?.name
+                  ? "lg:items-center"
+                  : "lg:items-end"
+              } justify-between mb-2 border rounded-lg p-3 space-y-2 lg:space-x-12`}
+            >
+              <FormField
+                control={form.control}
+                name={`skills.${index}.name`}
+                render={({ field }) => (
+                  <FormItem className="space-y-2 w-full">
+                    <FormLabel className="text-slate-700 font-semibold">
+                      Name:
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        className={`no-focus ${
+                          form.formState.errors.skills?.[index]?.name
+                            ? "error"
+                            : ""
+                        }`}
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          handleChange(index, e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`skills.${index}.rating`}
+                render={({ field }) => (
+                  <Rating
+                    style={{ maxWidth: 160, height: 46 }}
+                    value={field.value || 1}
+                    onChange={(value: number) => {
+                      field.onChange(value);
+                      handleRatingChange(index, value);
+                    }}
+                    orientation="horizontal"
+                    isRequired
+                  />
+                )}
               />
             </div>
-            <Rating
-              style={{ maxWidth: 160, height: 46 }}
-              value={item.rating || 1}
-              onChange={(v: any) => handleChange(index, "rating", v)}
-              orientation="horizontal"
-              isRequired
-            />
+          ))}
+          <div className="mt-5 flex gap-2 justify-between">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => append({ name: "", rating: 1 })}
+                className="text-primary"
+                type="button"
+              >
+                <Plus className="size-4 mr-2" /> Add More
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => remove(fields.length - 1)}
+                className="text-primary"
+                type="button"
+              >
+                <Minus className="size-4 mr-2" /> Remove
+              </Button>
+            </div>
+            <Button
+              disabled={isLoading || !form.formState.isValid}
+              type="submit"
+              className="bg-primary-700 hover:bg-primary-800 text-white"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" /> &nbsp; Saving
+                </>
+              ) : (
+                "Save"
+              )}
+            </Button>
           </div>
-        ))}
-      </div>
-      <div className="mt-5 flex gap-2 justify-between">
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={AddNewSkills}
-            className="text-primary"
-          >
-            <Plus className="size-4 mr-2" /> Add More
-          </Button>
-          <Button
-            variant="outline"
-            onClick={RemoveSkills}
-            className="text-primary"
-          >
-            <Minus className="size-4 mr-2" /> Remove
-          </Button>
-        </div>
-        <Button
-          disabled={isLoading}
-          onClick={onSave}
-          className="bg-primary-700 hover:bg-primary-800 text-white"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 size={20} className="animate-spin" /> &nbsp; Saving
-            </>
-          ) : (
-            "Save"
-          )}
-        </Button>
-      </div>
+        </form>
+      </Form>
     </div>
   );
 };

@@ -167,6 +167,15 @@
   }
 }
 
+.error {
+  margin-bottom: 20px;
+  border-width: 1px 1px 1px 10px;
+  border-style: solid;
+  border-color: rgb(191, 22, 80) rgb(191, 22, 80) rgb(191, 22, 80) rgb(236, 89, 144);
+  border-image: initial;
+  background: rgb(251, 236, 242);
+}
+
 /* Skeleton */
 .skeleton {
   @apply overflow-hidden relative bg-gray-200 bg-gradient-to-r from-transparent via-gray-200 to-transparent before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1s_infinite] before:border-t before:border-gray-300 before:bg-gradient-to-r before:from-transparent before:via-gray-300 before:to-transparent;

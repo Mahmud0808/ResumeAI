@@ -7,7 +7,19 @@ import { generateSummary } from "@/lib/actions/gemini.actions";
 import { updateResume } from "@/lib/actions/resume.actions";
 import { useFormContext } from "@/lib/context/FormProvider";
 import { Brain, Loader2 } from "lucide-react";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { SummaryValidationSchema } from "@/lib/validations/resume"; // Sesuaikan path
 
 const SummaryForm = ({ params }: { params: { id: string } }) => {
   const listRef = useRef<HTMLDivElement>(null);
@@ -15,33 +27,41 @@ const SummaryForm = ({ params }: { params: { id: string } }) => {
   const [summary, setSummary] = useState(formData?.summary || "");
   const [isLoading, setIsLoading] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiGeneratedSummaryList, setAiGeneratedSummaryList] = useState(
-    [] as any
+  const [aiGeneratedSummaryList, setAiGeneratedSummaryList] = useState<any[]>(
+    []
   );
   const { toast } = useToast();
+
+  const form = useForm<z.infer<typeof SummaryValidationSchema>>({
+    resolver: zodResolver(SummaryValidationSchema),
+    mode: "onChange",
+    defaultValues: {
+      summary: formData?.summary || "",
+    },
+  });
+
+  useEffect(() => {
+    if (formData?.summary) {
+      form.reset({ summary: formData.summary });
+    }
+  }, [formData, form]);
 
   const handleSummaryChange = (e: any) => {
     const newSummary = e.target.value;
     setSummary(newSummary);
 
     handleInputChange({
-      target: {
-        name: "summary",
-        value: newSummary,
-      },
+      target: { name: "summary", value: newSummary },
     });
   };
 
   const generateSummaryFromAI = async () => {
     setIsAiLoading(true);
-
     const result = await generateSummary(formData?.jobTitle);
-
     setAiGeneratedSummaryList(result);
-
     setIsAiLoading(false);
 
-    setTimeout(function () {
+    setTimeout(() => {
       listRef?.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
@@ -49,19 +69,10 @@ const SummaryForm = ({ params }: { params: { id: string } }) => {
     }, 100);
   };
 
-  const onSave = async (e: any) => {
-    e.preventDefault();
-
+  const onSave = async (data: z.infer<typeof SummaryValidationSchema>) => {
     setIsLoading(true);
-
-    const updates = {
-      summary: formData?.summary,
-    };
-
-    const result = await updateResume({
-      resumeId: params.id,
-      updates: updates,
-    });
+    const updates = { summary: data.summary };
+    const result = await updateResume({ resumeId: params.id, updates });
 
     if (result.success) {
       toast({
@@ -77,7 +88,6 @@ const SummaryForm = ({ params }: { params: { id: string } }) => {
         className: "bg-white",
       });
     }
-
     setIsLoading(false);
   };
 
@@ -91,50 +101,66 @@ const SummaryForm = ({ params }: { params: { id: string } }) => {
           Add summary about your job
         </p>
 
-        <form className="mt-5 space-y-2" onSubmit={onSave}>
-          <div className="flex justify-between items-end">
-            <label className=" text-slate-700 font-semibold">Summary:</label>
-            <Button
-              variant="outline"
-              onClick={() => {
-                generateSummaryFromAI();
-              }}
-              type="button"
-              size="sm"
-              className="border-primary text-primary flex gap-2"
-              disabled={isAiLoading}
-            >
-              {isAiLoading ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <Brain className="h-4 w-4" />
-              )}{" "}
-              Generate from AI
-            </Button>
-          </div>
-          <Textarea
-            className="no-focus min-h-[10em]"
-            required
-            value={summary}
-            onChange={handleSummaryChange}
-            defaultValue={formData?.summary || ""}
-          />
-          <div className="flex justify-end">
-            <Button
-              className="mt-3 bg-primary-700 hover:bg-primary-800 text-white"
-              type="submit"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 size={20} className="animate-spin" /> &nbsp; Saving
-                </>
-              ) : (
-                "Save"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSave)} className="mt-5 space-y-2">
+            <FormField
+              control={form.control}
+              name="summary"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex justify-between items-end">
+                    <FormLabel className="text-slate-700 font-semibold text-md">
+                      Summary:
+                    </FormLabel>
+                    <Button
+                      variant="outline"
+                      onClick={generateSummaryFromAI}
+                      type="button"
+                      size="sm"
+                      className="border-primary text-primary flex gap-2"
+                      disabled={isAiLoading}
+                    >
+                      {isAiLoading ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Brain className="h-4 w-4" />
+                      )}{" "}
+                      Generate from AI
+                    </Button>
+                  </div>
+                  <FormControl>
+                    <Textarea
+                      className={`no-focus min-h-[10em] ${
+                        form.formState.errors.summary ? "error" : ""
+                      }`}
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleSummaryChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </Button>
-          </div>
-        </form>
+            />
+            <div className="flex justify-end">
+              <Button
+                className="mt-3 bg-primary-700 hover:bg-primary-800 text-white"
+                type="submit"
+                disabled={isLoading || !form.formState.isValid}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin" /> &nbsp; Saving
+                  </>
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
 
       {aiGeneratedSummaryList.length > 0 && (

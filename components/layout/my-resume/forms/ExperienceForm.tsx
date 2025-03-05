@@ -9,41 +9,66 @@ import { addExperienceToResume } from "@/lib/actions/resume.actions";
 import { useFormContext } from "@/lib/context/FormProvider";
 import { Brain, Loader2, Minus, Plus } from "lucide-react";
 import React, { useRef, useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { ExperienceValidationSchema } from "@/lib/validations/resume";
+import { experienceFields } from "@/lib/fields";
 
 const ExperienceForm = ({ params }: { params: { id: string } }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const { formData, handleInputChange } = useFormContext();
   const [isLoading, setIsLoading] = useState(false);
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiGeneratedSummaryList, setAiGeneratedSummaryList] = useState(
-    [] as any
+  const [isAiLoading, setIsLoadingAi] = useState(false);
+  const [aiGeneratedSummaryList, setAiGeneratedSummaryList] = useState<any[]>(
+    []
   );
-  const [experienceList, setExperienceList] = useState(
-    formData?.experience.length > 0
-      ? formData?.experience
-      : [
-          {
-            title: "",
-            companyName: "",
-            city: "",
-            state: "",
-            startDate: "",
-            endDate: "",
-            workSummary: "",
-          },
-        ]
-  );
-  const [currentAiIndex, setCurrentAiIndex] = useState(
-    experienceList.length - 1
-  );
+  const [currentAiIndex, setCurrentAiIndex] = useState(0);
   const { toast } = useToast();
 
-  const handleChange = (index: number, event: any) => {
-    const newEntries = experienceList.slice();
-    const { name, value } = event.target;
-    newEntries[index][name] = value;
-    setExperienceList(newEntries);
+  const form = useForm<z.infer<typeof ExperienceValidationSchema>>({
+    resolver: zodResolver(ExperienceValidationSchema),
+    mode: "onChange",
+    defaultValues: {
+      experience:
+        formData?.experience?.length > 0
+          ? formData.experience
+          : [
+              {
+                title: "",
+                companyName: "",
+                city: "",
+                state: "",
+                startDate: "",
+                endDate: "",
+                workSummary: "",
+              },
+            ],
+    },
+  });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "experience",
+  });
+
+  const handleChange = (
+    index: number,
+    event:
+      | React.ChangeEvent<HTMLInputElement>
+      | { target: { name: string; value: string } }
+  ) => {
+    const { name, value } = event.target;
+    const newEntries = form.getValues("experience").slice();
+    newEntries[index] = { ...newEntries[index], [name]: value };
     handleInputChange({
       target: {
         name: "experience",
@@ -53,20 +78,17 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
   };
 
   const AddNewExperience = () => {
-    const newEntries = [
-      ...experienceList,
-      {
-        title: "",
-        companyName: "",
-        city: "",
-        state: "",
-        startDate: "",
-        endDate: "",
-        workSummary: "",
-      },
-    ];
-    setExperienceList(newEntries);
-
+    const newEntry = {
+      title: "",
+      companyName: "",
+      city: "",
+      state: "",
+      startDate: "",
+      endDate: "",
+      workSummary: "",
+    };
+    append(newEntry);
+    const newEntries = [...form.getValues("experience"), newEntry];
     handleInputChange({
       target: {
         name: "experience",
@@ -75,14 +97,12 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
     });
   };
 
-  const RemoveExperience = () => {
-    const newEntries = experienceList.slice(0, -1);
-    setExperienceList(newEntries);
-
-    if (currentAiIndex > newEntries.length - 1) {
-      setCurrentAiIndex(newEntries.length - 1);
+  const RemoveExperience = (index: number) => {
+    remove(index);
+    const newEntries = form.getValues("experience");
+    if (currentAiIndex >= newEntries.length) {
+      setCurrentAiIndex(newEntries.length - 1 >= 0 ? newEntries.length - 1 : 0);
     }
-
     handleInputChange({
       target: {
         name: "experience",
@@ -92,12 +112,8 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
   };
 
   const generateExperienceDescriptionFromAI = async (index: number) => {
-    if (
-      !formData?.experience[index]?.title ||
-      formData?.experience[index]?.title === "" ||
-      !formData?.experience[index]?.companyName ||
-      formData?.experience[index]?.companyName === ""
-    ) {
+    const experience = form.getValues("experience")[index];
+    if (!experience.title || !experience.companyName) {
       toast({
         title: "Uh Oh! Something went wrong.",
         description:
@@ -105,23 +121,19 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
         variant: "destructive",
         className: "bg-white border-2",
       });
-
       return;
     }
 
     setCurrentAiIndex(index);
-
-    setIsAiLoading(true);
+    setIsLoadingAi(true);
 
     const result = await generateExperienceDescription(
-      `${formData?.experience[index]?.title} at ${formData?.experience[index]?.companyName}`
+      `${experience.title} at ${experience.companyName}`
     );
-
     setAiGeneratedSummaryList(result);
+    setIsLoadingAi(false);
 
-    setIsAiLoading(false);
-
-    setTimeout(function () {
+    setTimeout(() => {
       listRef?.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
@@ -129,18 +141,21 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
     }, 100);
   };
 
-  const onSave = async (e: any) => {
-    e.preventDefault();
-
+  const onSave = async (data: z.infer<typeof ExperienceValidationSchema>) => {
     setIsLoading(true);
-
-    const result = await addExperienceToResume(params.id, formData.experience);
+    const result = await addExperienceToResume(params.id, data.experience);
 
     if (result.success) {
       toast({
         title: "Information saved.",
         description: "Professional experience updated successfully.",
         className: "bg-white",
+      });
+      handleInputChange({
+        target: {
+          name: "experience",
+          value: data.experience,
+        },
       });
     } else {
       toast({
@@ -150,7 +165,6 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
         className: "bg-white",
       });
     }
-
     setIsLoading(false);
   };
 
@@ -164,139 +178,118 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
           Add your previous job experiences
         </p>
 
-        <div className="mt-5">
-          {experienceList.map((item: any, index: number) => (
-            <div key={index}>
-              <div className="grid grid-cols-2 gap-3 border p-3 my-5 rounded-lg">
-                <div className="space-y-2">
-                  <label className="text-slate-700 font-semibold">
-                    Position Title:
-                  </label>
-                  <Input
-                    name="title"
-                    onChange={(event) => handleChange(index, event)}
-                    defaultValue={item?.title}
-                    className="no-focus"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSave)} className="mt-5">
+            {fields.map((item, index) => (
+              <div
+                key={item.id}
+                className="grid grid-cols-2 gap-3 border p-3 my-5 rounded-lg"
+              >
+                {experienceFields.map((config) => (
+                  <FormField
+                    key={config.name}
+                    control={form.control}
+                    name={`experience.${index}.${config.name}`}
+                    render={({ field }) => (
+                      <FormItem className={config.colSpan || ""}>
+                        {config.type === "richText" ? (
+                          <div className="flex justify-between items-end">
+                            <FormLabel className="text-slate-700 font-semibold text-md">
+                              {config.label}:
+                            </FormLabel>
+                            <Button
+                              variant="outline"
+                              onClick={() =>
+                                generateExperienceDescriptionFromAI(index)
+                              }
+                              type="button"
+                              size="sm"
+                              className="border-primary text-primary flex gap-2"
+                              disabled={isAiLoading}
+                            >
+                              {isAiLoading && currentAiIndex === index ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <Brain className="h-4 w-4" />
+                              )}{" "}
+                              Generate from AI
+                            </Button>
+                          </div>
+                        ) : (
+                          <FormLabel className="text-slate-700 font-semibold">
+                            {config.label}:
+                          </FormLabel>
+                        )}
+                        <FormControl>
+                          {config.type === "richText" ? (
+                            <RichTextEditor
+                              defaultValue={(field.value as string) || ""}
+                              onRichTextEditorChange={(e) => {
+                                field.onChange(e);
+                                handleChange(index, e);
+                              }}
+                            />
+                          ) : (
+                            <Input
+                              type={config.type}
+                              {...field}
+                              value={field.value as string}
+                              className={`no-focus ${
+                                form.formState.errors.experience?.[index]?.[
+                                  config.name
+                                ]
+                                  ? "error"
+                                  : ""
+                              }`}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                handleChange(index, e);
+                              }}
+                            />
+                          )}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-slate-700 font-semibold">
-                    Company Name:
-                  </label>
-                  <Input
-                    name="companyName"
-                    onChange={(event) => handleChange(index, event)}
-                    defaultValue={item?.companyName}
-                    className="no-focus"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-slate-700 font-semibold">City:</label>
-                  <Input
-                    name="city"
-                    onChange={(event) => handleChange(index, event)}
-                    defaultValue={item?.city}
-                    className="no-focus"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-slate-700 font-semibold">State:</label>
-                  <Input
-                    name="state"
-                    onChange={(event) => handleChange(index, event)}
-                    defaultValue={item?.state}
-                    className="no-focus"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-slate-700 font-semibold">
-                    Start Date:
-                  </label>
-                  <Input
-                    type="date"
-                    name="startDate"
-                    onChange={(event) => handleChange(index, event)}
-                    defaultValue={item?.startDate}
-                    className="no-focus"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-slate-700 font-semibold">
-                    End Date:
-                  </label>
-                  <Input
-                    type="date"
-                    name="endDate"
-                    onChange={(event) => handleChange(index, event)}
-                    defaultValue={item?.endDate}
-                    className="no-focus"
-                  />
-                </div>
-                <div className="col-span-2 space-y-2">
-                  <div className="flex justify-between items-end">
-                    <label className=" text-slate-700 font-semibold">
-                      Summary:
-                    </label>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        generateExperienceDescriptionFromAI(index);
-                      }}
-                      type="button"
-                      size="sm"
-                      className="border-primary text-primary flex gap-2"
-                      disabled={isAiLoading}
-                    >
-                      {isAiLoading && currentAiIndex === index ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        <Brain className="h-4 w-4" />
-                      )}{" "}
-                      Generate from AI
-                    </Button>
-                  </div>
-                  <RichTextEditor
-                    defaultValue={item?.workSummary || ""}
-                    onRichTextEditorChange={(value: string) =>
-                      handleChange(index, value)
-                    }
-                  />
-                </div>
+                ))}
               </div>
+            ))}
+            <div className="mt-3 flex gap-2 justify-between">
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={AddNewExperience}
+                  className="text-primary"
+                  type="button"
+                >
+                  <Plus className="size-4 mr-2" /> Add More
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => RemoveExperience(fields.length - 1)}
+                  className="text-primary"
+                  type="button"
+                >
+                  <Minus className="size-4 mr-2" /> Remove
+                </Button>
+              </div>
+              <Button
+                type="submit"
+                disabled={isLoading || !form.formState.isValid}
+                className="bg-primary-700 hover:bg-primary-800 text-white"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin" /> &nbsp; Saving
+                  </>
+                ) : (
+                  "Save"
+                )}
+              </Button>
             </div>
-          ))}
-        </div>
-        <div className="mt-3 flex gap-2 justify-between">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={AddNewExperience}
-              className="text-primary"
-            >
-              <Plus className="size-4 mr-2" /> Add More
-            </Button>
-            <Button
-              variant="outline"
-              onClick={RemoveExperience}
-              className="text-primary"
-            >
-              <Minus className="size-4 mr-2" /> Remove
-            </Button>
-          </div>
-          <Button
-            disabled={isLoading}
-            onClick={onSave}
-            className="bg-primary-700 hover:bg-primary-800 text-white"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 size={20} className="animate-spin" /> &nbsp; Saving
-              </>
-            ) : (
-              "Save"
-            )}
-          </Button>
-        </div>
+          </form>
+        </Form>
       </div>
 
       {aiGeneratedSummaryList.length > 0 && (
@@ -305,11 +298,19 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
           {aiGeneratedSummaryList?.map((item: any, index: number) => (
             <div
               key={index}
-              onClick={() =>
-                handleChange(currentAiIndex, {
-                  target: { name: "workSummary", value: item?.description },
-                })
-              }
+              onClick={() => {
+                form.setValue(
+                  `experience.${currentAiIndex}.workSummary`,
+                  item?.description,
+                  { shouldValidate: true }
+                );
+                handleInputChange({
+                  target: {
+                    name: "experience",
+                    value: form.getValues("experience"),
+                  },
+                });
+              }}
               className={`p-5 shadow-lg my-4 rounded-lg border-t-2 ${
                 isAiLoading ? "cursor-not-allowed" : "cursor-pointer"
               }`}
