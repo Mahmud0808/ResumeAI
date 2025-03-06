@@ -9,17 +9,13 @@ import {
 } from "react";
 import { fetchResume } from "../actions/resume.actions";
 
-// Define the shape of the context
 interface FormContextType {
-  formData: any; // Replace `any` with a more specific type if possible
-  handleInputChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => void;
+  formData: any;
+  handleInputChange: (e: { target: { name: string; value: any } }) => void;
   activeFormIndex: number;
   setActiveFormIndex: (index: number) => void;
 }
 
-// Create the context with an initial undefined value
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
 export const FormProvider = ({
@@ -29,10 +25,9 @@ export const FormProvider = ({
   params: { id: string };
   children: ReactNode;
 }) => {
-  const [formData, setFormData] = useState<any>({}); // Replace `any` with your form data type
-  const [activeFormIndex, setActiveFormIndex] = useState(1); // Add activeFormIndex state
+  const [formData, setFormData] = useState<any>({});
+  const [activeFormIndex, setActiveFormIndex] = useState(1);
 
-  // Fetch resume data on mount
   useEffect(() => {
     const loadResumeData = async () => {
       try {
@@ -44,12 +39,9 @@ export const FormProvider = ({
     };
 
     loadResumeData();
-  }, [params.id]); // Add params.id as a dependency
+  }, [params.id]);
 
-  // Handle input changes
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: { target: { name: string; value: any } }) => {
     const { name, value } = e.target;
     setFormData((prevData: any) => ({
       ...prevData,
@@ -57,7 +49,6 @@ export const FormProvider = ({
     }));
   };
 
-  // Provide the context value
   const contextValue: FormContextType = {
     formData,
     handleInputChange,
@@ -70,7 +61,6 @@ export const FormProvider = ({
   );
 };
 
-// Custom hook to use the context
 export const useFormContext = () => {
   const context = useContext(FormContext);
   if (!context) {

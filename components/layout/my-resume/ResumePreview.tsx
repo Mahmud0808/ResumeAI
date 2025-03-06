@@ -10,7 +10,7 @@ import EducationalPreview from "./previews/EducationalPreview";
 import { themeColors } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 
-const ResumePreview = () => {
+const ResumePreview = ({ download = false }) => {
   const { formData, setActiveFormIndex } = useFormContext();
   const pathname = usePathname();
 
@@ -58,7 +58,9 @@ const ResumePreview = () => {
   return (
     <div className="flex items-center justify-center">
       <div
-        className="shadow-lg p-14 border-t-[20px] bg-white w-[210mm] min-h-[297mm] print:shadow-none"
+        className={`${
+          download ? "p-3" : "p-12"
+        } shadow-lg border-t-[20px] bg-white w-[210mm] min-h-[297mm] print:shadow-none`}
         style={{
           borderColor: formData?.themeColor || themeColors[0],
         }}
