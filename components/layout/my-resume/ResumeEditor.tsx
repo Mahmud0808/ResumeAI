@@ -18,10 +18,14 @@ const ResumeEditor = ({
 
   return (
     <FormProvider params={params}>
-      <div className="p-10 max-sm:p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 justify-center items-start pb-16 max-sm:pb-8">
-          <ResumeEditForm params={params} userId={userId} />
-          <ResumePreview />
+      <div className="px-10 pt-10 pb-2 max-sm:px-6 max-sm:pt-6 max-sm:pb-0 lg:h-[calc(100vh-50px)] overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 justify-center items-start h-[calc(100%-5px)] max-sm:h-[calc(100%-2rem)] overflow-hidden">
+          <div className="h-full overflow-y-auto no-scrollbar p-1">
+            <ResumeEditForm params={params} userId={userId} />
+          </div>
+          <div className="h-full overflow-y-auto no-scrollbar p-1">
+            <ResumePreview />
+          </div>
         </div>
       </div>
     </FormProvider>

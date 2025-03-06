@@ -36,6 +36,7 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
 
   const form = useForm({
     resolver: zodResolver(ResumeNameValidationSchema),
+    mode: "onChange",
     defaultValues: {
       name: "",
     },
@@ -113,7 +114,9 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
                       <Input
                         type="text"
                         placeholder="Example: Android Developer Resume"
-                        className="no-focus"
+                        className={`no-focus ${
+                          form.formState.errors.name ? "error" : ""
+                        }`}
                         autoComplete="off"
                         {...field}
                       />
@@ -122,16 +125,23 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
                   </FormItem>
                 )}
               />
+
               <div className="mt-10 flex justify-end gap-5">
                 <button
                   type="button"
-                  onClick={() => setOpenDialog(false)}
+                  onClick={() => {
+                    setOpenDialog(false);
+                    form.reset({ name: "" });
+                  }}
                   className="btn-ghost"
                   disabled={isLoading}
                 >
                   Cancel
                 </button>
-                <Button type="submit" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  disabled={isLoading || !form.formState.isValid}
+                >
                   {isLoading ? (
                     <>
                       <Loader2 size={20} className="animate-spin" /> &nbsp;

@@ -2,13 +2,14 @@
 
 import Header from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { FormProvider, useFormContext } from "@/lib/context/FormProvider";
+import { FormProvider } from "@/lib/context/FormProvider"; // Remove useFormContext if not needed
 import { RWebShare } from "react-web-share";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ResumePreview from "@/components/layout/my-resume/ResumePreview";
 import { usePathname } from "next/navigation";
 import PageWrapper from "@/components/common/PageWrapper";
 import { DownloadIcon, Share2Icon } from "lucide-react";
+import { fetchResume } from "@/lib/actions/resume.actions";
 
 const FinalResumeView = ({
   params,
@@ -18,7 +19,20 @@ const FinalResumeView = ({
   isOwnerView: boolean;
 }) => {
   const path = usePathname();
-  const { formData } = useFormContext();
+  const [formData, setFormData] = useState<any>({});
+
+  useEffect(() => {
+    const loadResumeData = async () => {
+      try {
+        const resumeData = await fetchResume(params.id);
+        setFormData(JSON.parse(resumeData));
+      } catch (error) {
+        console.error("Error fetching resume:", error);
+      }
+    };
+
+    loadResumeData();
+  }, [params.id]);
 
   const handleDownload = () => {
     window.print();
