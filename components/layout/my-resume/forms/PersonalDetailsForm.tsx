@@ -124,6 +124,7 @@ const PersonalDetailsForm = ({ params }: { params: { id: string } }) => {
           <div className="mt-5 flex justify-end gap-5">
             <Button
               type="submit"
+              className="bg-primary-700 hover:bg-primary-800 text-white"
               disabled={!form.formState.isValid || form.formState.isSubmitting}
             >
               {isLoading ? (
