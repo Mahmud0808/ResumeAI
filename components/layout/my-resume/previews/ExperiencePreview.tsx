@@ -49,7 +49,7 @@ const ExperiencePreview = () => {
           </h2>
           {experience?.workSummary && (
             <div
-              className="text-xs my-2 form-preview"
+              className="text-xs text-justify my-2 form-preview"
               dangerouslySetInnerHTML={{
                 __html: experience?.workSummary,
               }}
