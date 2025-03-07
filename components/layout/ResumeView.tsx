@@ -100,7 +100,7 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
                 <RWebShare
                   data={{
                     text: "Check out my resume!",
-                    url: `${process.env.BASE_URL}/${path}`,
+                    url: `${path}`,
                     title: `${formData?.firstName ?? "User"} ${
                       formData?.lastName ?? "Resume"
                     }'s Resume`,
