@@ -37,13 +37,18 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
     loadResumeData();
   }, [params.id]);
 
+  const sanitize = (str: string | undefined | null): string =>
+    str?.trim().replace(/\s+/g, "_") || "User_Resume";
+
   const handleDownloadPDF = () => {
     const element = document.getElementById("print-area");
     const opt = {
-      margin: 1,
-      filename: `${formData?.firstName ?? "User"}_${
-        formData?.lastName ?? "Resume"
-      }_Resume.pdf`,
+      margin: 0,
+      filename: `${sanitize(
+        `${formData?.firstName ?? "User"}_${formData?.lastName ?? ""}_${
+          formData?.jobTitle ?? ""
+        }_Resume.pdf`
+      )}`,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
@@ -53,10 +58,10 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
       setDownload(true);
 
       html2pdf()
-        .from(element)
         .set(opt)
+        .from(element)
         .save()
-        .then(() => {
+        .finally(() => {
           setDownload(false);
         });
     }
@@ -100,7 +105,7 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
                 <RWebShare
                   data={{
                     text: "Check out my resume!",
-                    url: `${process.env.BASE_URL}/${path}`,
+                    url: `${path}`,
                     title: `${formData?.firstName ?? "User"} ${
                       formData?.lastName ?? "Resume"
                     }'s Resume`,

@@ -59,7 +59,7 @@ const ResumePreview = ({ download = false }) => {
     <div className="flex items-center justify-center">
       <div
         className={`${
-          download ? "p-3" : "p-12"
+          download ? "p-12" : "p-12"
         } shadow-lg border-t-[20px] bg-white w-[210mm] min-h-[297mm] print:shadow-none`}
         style={{
           borderColor: formData?.themeColor || themeColors[0],
