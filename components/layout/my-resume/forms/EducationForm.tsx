@@ -1,57 +1,73 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { generateEducationDescription } from "@/lib/actions/gemini.actions";
 import { addEducationToResume } from "@/lib/actions/resume.actions";
 import { useFormContext } from "@/lib/context/FormProvider";
+import { educationFields } from "@/lib/fields";
+import { EducationValidationSchema } from "@/lib/validations/resume";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Brain, Loader2, Minus, Plus } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
 
 const EducationForm = ({ params }: { params: { id: string } }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const { formData, handleInputChange } = useFormContext();
   const [isLoading, setIsLoading] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiGeneratedDescriptionList, setAiGeneratedDescriptionList] = useState(
-    [] as any
-  );
-  const [educationList, setEducationList] = useState(
-    formData?.education.length > 0
-      ? formData?.education
-      : [
-          {
-            universityName: "",
-            degree: "",
-            major: "",
-            startDate: "",
-            endDate: "",
-            description: "",
-          },
-        ]
-  );
-  const [currentAiIndex, setCurrentAiIndex] = useState(
-    educationList.length - 1
-  );
+  const [aiGeneratedDescriptionList, setAiGeneratedDescriptionList] = useState<
+    any[]
+  >([]);
+  const [currentAiIndex, setCurrentAiIndex] = useState(0);
   const { toast } = useToast();
 
-  useEffect(() => {
-    educationList.forEach((education: any, index: number) => {
-      const textarea = document.getElementById(`description-${index}`) as any;
-      if (textarea) {
-        textarea.value = education.description;
-      }
-    });
-  }, [educationList]);
+  const form = useForm<z.infer<typeof EducationValidationSchema>>({
+    resolver: zodResolver(EducationValidationSchema),
+    mode: "onChange",
+    defaultValues: {
+      education:
+        formData?.education?.length > 0
+          ? formData.education
+          : [
+              {
+                universityName: "",
+                degree: "",
+                major: "",
+                startDate: "",
+                endDate: "",
+                description: "",
+              },
+            ],
+    },
+  });
 
-  const handleChange = (event: any, index: number) => {
-    const newEntries = educationList.slice();
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "education",
+  });
+
+  const handleChange = (
+    index: number,
+    event:
+      | React.ChangeEvent<HTMLInputElement>
+      | { target: { name: string; value: string } }
+  ) => {
     const { name, value } = event.target;
-    newEntries[index][name] = value;
-    setEducationList(newEntries);
-
+    const newEntries = form.getValues("education").slice();
+    newEntries[index] = { ...newEntries[index], [name]: value };
     handleInputChange({
       target: {
         name: "education",
@@ -61,19 +77,16 @@ const EducationForm = ({ params }: { params: { id: string } }) => {
   };
 
   const AddNewEducation = () => {
-    const newEntries = [
-      ...educationList,
-      {
-        universityName: "",
-        degree: "",
-        major: "",
-        startDate: "",
-        endDate: "",
-        description: "",
-      },
-    ];
-    setEducationList(newEntries);
-
+    const newEntry = {
+      universityName: "",
+      degree: "",
+      major: "",
+      startDate: "",
+      endDate: "",
+      description: "",
+    };
+    append(newEntry);
+    const newEntries = [...form.getValues("education"), newEntry];
     handleInputChange({
       target: {
         name: "education",
@@ -82,14 +95,12 @@ const EducationForm = ({ params }: { params: { id: string } }) => {
     });
   };
 
-  const RemoveEducation = () => {
-    const newEntries = educationList.slice(0, -1);
-    setEducationList(newEntries);
-
-    if (currentAiIndex > newEntries.length - 1) {
-      setCurrentAiIndex(newEntries.length - 1);
+  const RemoveEducation = (index: number) => {
+    remove(index);
+    const newEntries = form.getValues("education");
+    if (currentAiIndex >= newEntries.length) {
+      setCurrentAiIndex(newEntries.length - 1 >= 0 ? newEntries.length - 1 : 0);
     }
-
     handleInputChange({
       target: {
         name: "education",
@@ -99,14 +110,8 @@ const EducationForm = ({ params }: { params: { id: string } }) => {
   };
 
   const generateEducationDescriptionFromAI = async (index: number) => {
-    if (
-      !formData?.education[index]?.universityName ||
-      formData?.education[index]?.universityName === "" ||
-      !formData?.education[index]?.degree ||
-      formData?.education[index]?.degree === "" ||
-      !formData?.education[index]?.major ||
-      formData?.education[index]?.major === ""
-    ) {
+    const education = form.getValues("education")[index];
+    if (!education.universityName || !education.degree || !education.major) {
       toast({
         title: "Uh Oh! Something went wrong.",
         description:
@@ -114,20 +119,17 @@ const EducationForm = ({ params }: { params: { id: string } }) => {
         variant: "destructive",
         className: "bg-white border-2",
       });
-
       return;
     }
 
     setCurrentAiIndex(index);
-
     setIsAiLoading(true);
 
     const result = await generateEducationDescription(
-      `${formData?.education[index]?.universityName} on ${formData?.education[index]?.degree} in ${formData?.education[index]?.major}`
+      `${education.universityName} on ${education.degree} in ${education.major}`
     );
 
     setAiGeneratedDescriptionList(result);
-
     setIsAiLoading(false);
 
     setTimeout(function () {
@@ -138,18 +140,22 @@ const EducationForm = ({ params }: { params: { id: string } }) => {
     }, 100);
   };
 
-  const onSave = async (e: any) => {
-    e.preventDefault();
-
+  const onSave = async (data: z.infer<typeof EducationValidationSchema>) => {
     setIsLoading(true);
 
-    const result = await addEducationToResume(params.id, formData.education);
+    const result = await addEducationToResume(params.id, data.education);
 
     if (result.success) {
       toast({
         title: "Information saved.",
         description: "Educational details updated successfully.",
         className: "bg-white",
+      });
+      handleInputChange({
+        target: {
+          name: "education",
+          value: data.education,
+        },
       });
     } else {
       toast({
@@ -173,127 +179,127 @@ const EducationForm = ({ params }: { params: { id: string } }) => {
           Add your educational details
         </p>
 
-        {educationList.map((item: any, index: number) => (
-          <div key={index}>
-            <div className="grid grid-cols-2 gap-3 border p-3 my-5 rounded-lg">
-              <div className="col-span-2 space-y-2">
-                <label className="text-slate-700 font-semibold">
-                  Name of Institute:
-                </label>
-                <Input
-                  name="universityName"
-                  onChange={(e) => handleChange(e, index)}
-                  defaultValue={item?.universityName}
-                  className="no-focus"
-                />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSave)} className="mt-5">
+            {fields.map((item, index) => (
+              <div
+                key={item.id}
+                className="grid grid-cols-2 gap-3 border p-3 my-5 rounded-lg"
+              >
+                {educationFields.map((config) => (
+                  <FormField
+                    key={config.name}
+                    control={form.control}
+                    name={`education.${index}.${config.name}`}
+                    render={({ field }) => (
+                      <FormItem className={config.colSpan || ""}>
+                        {config.type === "textarea" ? (
+                          <div className="flex justify-between items-end">
+                            <FormLabel className="text-slate-700 font-semibold text-md">
+                              {config.label}:
+                            </FormLabel>
+                            <Button
+                              variant="outline"
+                              onClick={() =>
+                                generateEducationDescriptionFromAI(index)
+                              }
+                              type="button"
+                              size="sm"
+                              className="border-primary text-primary flex gap-2"
+                              disabled={isAiLoading}
+                            >
+                              {isAiLoading && currentAiIndex === index ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <Brain className="h-4 w-4" />
+                              )}{" "}
+                              Generate from AI
+                            </Button>
+                          </div>
+                        ) : (
+                          <FormLabel className="text-slate-700 font-semibold text-md">
+                            {config.label}:
+                          </FormLabel>
+                        )}
+                        <FormControl>
+                          {config.type === "textarea" ? (
+                            <Textarea
+                              {...field}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                handleChange(index, e);
+                              }}
+                              defaultValue={(field.value as string) || ""}
+                              className={`no-focus ${
+                                form.formState.errors.education?.[index]?.[
+                                  config.name
+                                ]
+                                  ? "error"
+                                  : ""
+                              }`}
+                              rows={6}
+                            />
+                          ) : (
+                            <Input
+                              type={config.type}
+                              {...field}
+                              value={field.value as string}
+                              className={`no-focus ${
+                                form.formState.errors.education?.[index]?.[
+                                  config.name
+                                ]
+                                  ? "error"
+                                  : ""
+                              }`}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                handleChange(index, e);
+                              }}
+                            />
+                          )}
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
               </div>
-              <div className="space-y-2">
-                <label className="text-slate-700 font-semibold">Degree:</label>
-                <Input
-                  name="degree"
-                  onChange={(e) => handleChange(e, index)}
-                  defaultValue={item?.degree}
-                  className="no-focus"
-                />
+            ))}
+            <div className="mt-3 flex gap-2 justify-between">
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={AddNewEducation}
+                  className="text-primary"
+                  type="button"
+                >
+                  <Plus className="size-4 mr-2" /> Add More
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => RemoveEducation(fields.length - 1)}
+                  className="text-primary"
+                  type="button"
+                >
+                  <Minus className="size-4 mr-2" /> Remove
+                </Button>
               </div>
-              <div className="space-y-2">
-                <label className="text-slate-700 font-semibold">Major:</label>
-                <Input
-                  name="major"
-                  onChange={(e) => handleChange(e, index)}
-                  defaultValue={item?.major}
-                  className="no-focus"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-slate-700 font-semibold">
-                  Start Date:
-                </label>
-                <Input
-                  type="date"
-                  name="startDate"
-                  onChange={(e) => handleChange(e, index)}
-                  defaultValue={item?.startDate}
-                  className="no-focus"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-slate-700 font-semibold">
-                  End Date:
-                </label>
-                <Input
-                  type="date"
-                  name="endDate"
-                  onChange={(e) => handleChange(e, index)}
-                  defaultValue={item?.endDate}
-                  className="no-focus"
-                />
-              </div>
-              <div className="col-span-2 space-y-2">
-                <div className="flex justify-between items-end mt-2">
-                  <label className="text-slate-700 font-semibold">
-                    Description:
-                  </label>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      generateEducationDescriptionFromAI(index);
-                    }}
-                    type="button"
-                    size="sm"
-                    className="border-primary text-primary flex gap-2"
-                    disabled={isAiLoading}
-                  >
-                    {isAiLoading && currentAiIndex === index ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <Brain className="h-4 w-4" />
-                    )}{" "}
-                    Generate from AI
-                  </Button>
-                </div>
-                <Textarea
-                  id={`description-${index}`}
-                  name="description"
-                  onChange={(e) => handleChange(e, index)}
-                  defaultValue={item?.description || ""}
-                  className="no-focus"
-                />
-              </div>
+              <Button
+                type="submit"
+                disabled={isLoading || !form.formState.isValid}
+                className="bg-primary-700 hover:bg-primary-800 text-white"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin" /> &nbsp; Saving
+                  </>
+                ) : (
+                  "Save"
+                )}
+              </Button>
             </div>
-          </div>
-        ))}
-        <div className="mt-3 flex gap-2 justify-between">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={AddNewEducation}
-              className="text-primary"
-            >
-              <Plus className="size-4 mr-2" /> Add More
-            </Button>
-            <Button
-              variant="outline"
-              onClick={RemoveEducation}
-              className="text-primary"
-            >
-              <Minus className="size-4 mr-2" /> Remove
-            </Button>
-          </div>
-          <Button
-            disabled={isLoading}
-            onClick={onSave}
-            className="bg-primary-700 hover:bg-primary-800 text-white"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 size={20} className="animate-spin" /> &nbsp; Saving
-              </>
-            ) : (
-              "Save"
-            )}
-          </Button>
-        </div>
+          </form>
+        </Form>
       </div>
 
       {aiGeneratedDescriptionList.length > 0 && (
@@ -302,14 +308,19 @@ const EducationForm = ({ params }: { params: { id: string } }) => {
           {aiGeneratedDescriptionList?.map((item: any, index: number) => (
             <div
               key={index}
-              onClick={() =>
-                handleChange(
-                  {
-                    target: { name: "description", value: item?.description },
+              onClick={() => {
+                form.setValue(
+                  `education.${currentAiIndex}.description`,
+                  item?.description,
+                  { shouldValidate: true }
+                );
+                handleInputChange({
+                  target: {
+                    name: "education",
+                    value: form.getValues("education"),
                   },
-                  currentAiIndex
-                )
-              }
+                });
+              }}
               className={`p-5 shadow-lg my-4 rounded-lg border-t-2 ${
                 isAiLoading ? "cursor-not-allowed" : "cursor-pointer"
               }`}

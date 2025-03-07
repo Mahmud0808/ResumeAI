@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "../../ui/button";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import { redirect } from "next/navigation";
@@ -33,9 +33,8 @@ const ResumeEditForm = ({
 
   const router = useRouter();
   const { toast } = useToast();
-  const [activeFormIndex, setActiveFormIndex] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const { formData } = useFormContext();
+  const { formData, activeFormIndex, setActiveFormIndex } = useFormContext();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   return (
     <div className="flex flex-col gap-5">
@@ -56,7 +55,7 @@ const ResumeEditForm = ({
             size="sm"
             disabled={isLoading}
             onClick={async () => {
-              if (activeFormIndex != 5) {
+              if (activeFormIndex !== 5) {
                 setActiveFormIndex(activeFormIndex + 1);
               } else {
                 setIsLoading(true);
@@ -126,11 +125,11 @@ const ResumeEditForm = ({
               }
             }}
           >
-            {activeFormIndex == 5 ? (
+            {activeFormIndex === 5 ? (
               <>
                 {isLoading ? (
                   <>
-                    Finishing &nbsp; <Loader2 className="size-5 animate-spin" />
+                    Finishing <Loader2 className="size-5 animate-spin" />
                   </>
                 ) : (
                   <>
@@ -146,17 +145,17 @@ const ResumeEditForm = ({
           </Button>
         </div>
       </div>
-      {activeFormIndex == 1 ? (
+      {activeFormIndex === 1 ? (
         <PersonalDetailsForm params={params} />
-      ) : activeFormIndex == 2 ? (
+      ) : activeFormIndex === 2 ? (
         <SummaryForm params={params} />
-      ) : activeFormIndex == 3 ? (
+      ) : activeFormIndex === 3 ? (
         <ExperienceForm params={params} />
-      ) : activeFormIndex == 4 ? (
+      ) : activeFormIndex === 4 ? (
         <EducationForm params={params} />
-      ) : activeFormIndex == 5 ? (
+      ) : activeFormIndex === 5 ? (
         <SkillsForm params={params} />
-      ) : activeFormIndex == 6 ? (
+      ) : activeFormIndex === 6 ? (
         redirect("/my-resume/" + params.id + "/view")
       ) : null}
     </div>
