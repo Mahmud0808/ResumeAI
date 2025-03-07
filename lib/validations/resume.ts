@@ -4,7 +4,7 @@ import { stripHtml } from "../utils";
 export const name = z
   .string()
   .trim()
-  .min(3, { message: "must be at least 3 characters long" });
+  .min(1, { message: "Name must be at least 1 characters long" });
 
 export const jobTitle = z
   .string()
@@ -48,7 +48,7 @@ export const startDate = z
   .string()
   .min(1, { message: "Start date is required" });
 
-export const endDate = z.string().min(1, { message: "End date is required" });
+export const endDate = z.string().optional();
 
 export const descriptionSchema = z
   .string()
@@ -110,9 +110,12 @@ export const ExperienceValidationSchema = z.object({
       })
       .refine(
         (data) => {
-          const start = new Date(data.startDate);
-          const end = new Date(data.endDate);
-          return end >= start;
+          if (data.endDate) {
+            const start = new Date(data.startDate);
+            const end = new Date(data.endDate);
+            return end >= start;
+          }
+          return true;
         },
         {
           message: "End date must be on or after the start date",
@@ -135,9 +138,12 @@ export const EducationValidationSchema = z.object({
       })
       .refine(
         (data) => {
-          const start = new Date(data.startDate);
-          const end = new Date(data.endDate);
-          return end >= start;
+          if (data.endDate) {
+            const start = new Date(data.startDate);
+            const end = new Date(data.endDate);
+            return end >= start;
+          }
+          return true;
         },
         {
           message: "End date must be on or after the start date",
