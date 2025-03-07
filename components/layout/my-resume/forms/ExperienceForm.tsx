@@ -216,7 +216,7 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
                             </Button>
                           </div>
                         ) : (
-                          <FormLabel className="text-slate-700 font-semibold">
+                          <FormLabel className="text-slate-700 font-semibold text-md">
                             {config.label}:
                           </FormLabel>
                         )}

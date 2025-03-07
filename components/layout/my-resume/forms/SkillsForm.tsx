@@ -110,7 +110,7 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
         Skill Sets
       </h2>
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-        Add Your top professional key skills
+        Add your top professional key skills
       </p>
 
       <Form {...form}>
@@ -129,7 +129,7 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
                 name={`skills.${index}.name`}
                 render={({ field }) => (
                   <FormItem className="space-y-2 w-full">
-                    <FormLabel className="text-slate-700 font-semibold">
+                    <FormLabel className="text-slate-700 font-semibold text-md">
                       Name:
                     </FormLabel>
                     <FormControl>

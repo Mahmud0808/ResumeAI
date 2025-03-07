@@ -82,7 +82,7 @@ const PersonalDetailsForm = ({ params }: { params: { id: string } }) => {
         Personal Details
       </h2>
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-        Get Started with the basic information
+        Get started with the basic information
       </p>
 
       <Form {...form}>
