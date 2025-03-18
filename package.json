@@ -26,7 +26,7 @@
     "clsx": "^2.1.1",
     "draft-js": "^0.11.7",
     "html2pdf.js": "^0.10.3",
-    "jspdf": "^3.0.0",
+    "jspdf": "^3.0.1",
     "lucide-react": "^0.408.0",
     "mongodb": "^6.8.0",
     "mongoose": "^8.9.5",
