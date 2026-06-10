@@ -3,6 +3,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { requireUserId } from "../auth";
 import { checkAiGenerationAllowed } from "../rateLimit";
+import { isQuotaError, sanitizeInput } from "../aiUtils";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
@@ -56,6 +57,15 @@ async function askGemini(prompt: string): Promise<AiResult> {
     return { success: true, data: JSON.parse(text) };
   } catch (error: any) {
     console.error(`Gemini request failed: ${error?.message}`);
+
+    if (isQuotaError(error)) {
+      return {
+        success: false,
+        error:
+          "The AI service is temporarily over its quota. Please try again in a few minutes.",
+      };
+    }
+
     return {
       success: false,
       error: "AI generation failed. Please try again.",
@@ -64,9 +74,10 @@ async function askGemini(prompt: string): Promise<AiResult> {
 }
 
 export async function generateSummary(jobTitle: string): Promise<AiResult> {
+  const safeJobTitle = sanitizeInput(jobTitle);
   const prompt =
-    jobTitle && jobTitle !== ""
-      ? `Given the job title '${jobTitle}', provide a summary for three experience levels: Senior, Mid Level, and Fresher. Each summary should be 3-4 lines long and include the experience level and the corresponding summary in JSON format. The output should be an array of objects, each containing 'experience_level' and 'summary' fields. Ensure the summaries are tailored to each experience level.`
+    safeJobTitle !== ""
+      ? `Given the job title '${safeJobTitle}', provide a summary for three experience levels: Senior, Mid Level, and Fresher. Each summary should be 3-4 lines long and include the experience level and the corresponding summary in JSON format. The output should be an array of objects, each containing 'experience_level' and 'summary' fields. Ensure the summaries are tailored to each experience level.`
       : `Create a 3-4 line summary about myself for my resume, emphasizing my personality, social skills, and interests outside of work. The output should be an array of JSON objects, each containing 'experience_level' and 'summary' fields representing Active, Average, and Lazy personality traits. Use example hobbies if needed but do not insert placeholders for me to fill in.`;
 
   return askGemini(prompt);
@@ -75,7 +86,9 @@ export async function generateSummary(jobTitle: string): Promise<AiResult> {
 export async function generateEducationDescription(
   educationInfo: string
 ): Promise<AiResult> {
-  const prompt = `Based on my education at ${educationInfo}, provide personal descriptions for three levels of curriculum activities: High Activity, Medium Activity, and Low Activity. Each description should be 3-4 lines long and written from my perspective, reflecting on past experiences. The output should be an array of JSON objects, each containing 'activity_level' and 'description' fields. Please include a subtle hint about my good (but not the best) results.`;
+  const prompt = `Based on my education at ${sanitizeInput(
+    educationInfo
+  )}, provide personal descriptions for three levels of curriculum activities: High Activity, Medium Activity, and Low Activity. Each description should be 3-4 lines long and written from my perspective, reflecting on past experiences. The output should be an array of JSON objects, each containing 'activity_level' and 'description' fields. Please include a subtle hint about my good (but not the best) results.`;
 
   return askGemini(prompt);
 }
@@ -83,7 +96,9 @@ export async function generateEducationDescription(
 export async function generateExperienceDescription(
   experienceInfo: string
 ): Promise<AiResult> {
-  const prompt = `Given that I have experience working as ${experienceInfo}, provide a summary of three levels of activities I performed in that position, preferably as a list: High Activity, Medium Activity, and Low Activity. Each summary should be 3-4 lines long and written from my perspective, reflecting on my past experiences in that workplace. The output should be an array of JSON objects, each containing 'activity_level' and 'description' fields. You can include <b>, <i>, <u>, <s>, <blockquote>, <ul>, <ol>, and <li> to further enhance the descriptions. Use example work samples if needed, but do not insert placeholders for me to fill in.`;
+  const prompt = `Given that I have experience working as ${sanitizeInput(
+    experienceInfo
+  )}, provide a summary of three levels of activities I performed in that position, preferably as a list: High Activity, Medium Activity, and Low Activity. Each summary should be 3-4 lines long and written from my perspective, reflecting on my past experiences in that workplace. The output should be an array of JSON objects, each containing 'activity_level' and 'description' fields. You can include <b>, <i>, <u>, <s>, <blockquote>, <ul>, <ol>, and <li> to further enhance the descriptions. Use example work samples if needed, but do not insert placeholders for me to fill in.`;
 
   return askGemini(prompt);
 }

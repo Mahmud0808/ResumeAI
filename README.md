@@ -25,13 +25,15 @@
 
 - **AI-Powered Resume Generation:** Generate a professional resume using AI.
 
-- **User Authentication:** Secure login and registration with NextAuth (Google OAuth + email/password).
+- **User Authentication:** Secure login and registration with NextAuth (Google OAuth + email/password), with brute-force rate limiting.
 
 - **Real-Time Preview:** See live updates as you fill out the resume form.
 
 - **Easy Customization:** Edit sections like experience, education, skills, and more.
 
-- **Save and Share:** Save your resume and share a link with potential employers.
+- **Save and Share:** Save your resume and share a private link; resumes are private by default with an opt-in public toggle.
+
+- **PDF Export:** Download an ATS-friendly, vector PDF via native print.
 
 - **Responsiveness:** Ensures the application adapts seamlessly to various screen sizes and devices.
 
@@ -93,6 +95,10 @@ MONGODB_URL=
 GEMINI_API_KEY=
 
 BASE_URL=localhost:3000
+
+# Optional: only set locally if Node fails Atlas SRV lookups
+# (querySrv ECONNREFUSED). Leave unset on Vercel.
+# DNS_SERVERS=
 ```
 
 Replace the placeholder values with your actual credentials. You can obtain these by signing up at [Google Cloud Console](https://console.cloud.google.com/) (OAuth), [MongoDB](https://mongodb.com/) and [Google AI Studio](https://aistudio.google.com/app/apikey). See [docs/AUTH_SETUP.md](docs/AUTH_SETUP.md) for the full auth setup.
@@ -104,6 +110,12 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to view the project.
+
+### Running Tests
+
+```bash
+npm test
+```
 
 ## 🤝 Contributing
 
@@ -117,8 +129,9 @@ Contributions are welcome! Here's how you can contribute:
 
 ## 📢 Notice
 
-As of February 2025, the website has exceeded its maximum user limit (500 users).
-To continue testing the project, please fork the repository, set up the required environment variables, and run it locally.
+Authentication has been migrated from Clerk to NextAuth, removing the previous
+500-user cap — registrations are no longer limited. You can use the live app, or
+fork the repository, set up the environment variables, and run it locally.
 
 ## 📬 Contact
 

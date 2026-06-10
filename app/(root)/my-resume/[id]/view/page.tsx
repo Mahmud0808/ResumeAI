@@ -1,7 +1,9 @@
 import FinalResumeView from "@/components/layout/ResumeView";
 import React from "react";
 import { Metadata } from "next";
+import Link from "next/link";
 import {
+  canViewResume,
   checkResumeOwnership,
   fetchResume,
 } from "@/lib/actions/resume.actions";
@@ -30,7 +32,26 @@ export async function generateMetadata({
 }
 
 const MyResume = async ({ params }: { params: { id: string } }) => {
-  const isResumeOwner = await checkResumeOwnership(params.id);
+  const [isResumeOwner, viewable] = await Promise.all([
+    checkResumeOwnership(params.id),
+    canViewResume(params.id),
+  ]);
+
+  if (!viewable) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 p-10 text-center">
+        <h2 className="text-2xl font-bold text-slate-800">
+          This resume is private
+        </h2>
+        <p className="text-gray-600">
+          The owner has not shared this resume publicly.
+        </p>
+        <Link href="/" className="font-semibold text-primary-700">
+          Go home
+        </Link>
+      </div>
+    );
+  }
 
   return <FinalResumeView params={params} isOwnerView={isResumeOwner} />;
 };

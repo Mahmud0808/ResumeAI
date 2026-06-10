@@ -6,6 +6,7 @@ import Resume from "../models/resume.model";
 import Skill from "../models/skill.model";
 import { connectToDB } from "../mongoose";
 import { getCurrentUserId, requireUserId } from "../auth";
+import { verifyOwnership } from "../ownership";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -24,11 +25,28 @@ async function assertResumeOwner(resumeId: string) {
     throw new Error("Resume not found");
   }
 
-  if (resume.userId !== userId) {
-    throw new Error("Forbidden");
-  }
+  verifyOwnership(resume.userId, userId);
 
   return resume;
+}
+
+/**
+ * Deletes sub-documents that were previously attached to a resume but are no
+ * longer in the new set, preventing orphaned Experience/Education/Skill docs.
+ */
+async function deleteOrphans(
+  model: { deleteMany: (filter: any) => Promise<any> },
+  previous: any[],
+  kept: any[]
+) {
+  const keptIds = new Set(kept.map((id) => id.toString()));
+  const orphanIds = (previous ?? [])
+    .map((id) => id.toString())
+    .filter((id) => !keptIds.has(id));
+
+  if (orphanIds.length) {
+    await model.deleteMany({ _id: { $in: orphanIds } });
+  }
 }
 
 export async function createResume({
@@ -74,9 +92,45 @@ export async function fetchResume(resumeId: string) {
         model: Skill,
       });
 
+    // Opt-in sharing: only public resumes are readable by non-owners.
+    if (resume && resume.isPublic !== true) {
+      const callerId = await getCurrentUserId();
+      if (callerId !== resume.userId) {
+        return JSON.stringify(null);
+      }
+    }
+
     return JSON.stringify(resume);
   } catch (error: any) {
     throw new Error(`Failed to fetch resume: ${error.message}`);
+  }
+}
+
+/**
+ * Whether the current request may view a resume: true if it is public or owned
+ * by the caller. Used by the view page to gate private resumes.
+ */
+export async function canViewResume(resumeId: string) {
+  try {
+    await connectToDB();
+
+    const resume = await Resume.findOne(
+      { resumeId: resumeId },
+      { isPublic: 1, userId: 1 }
+    );
+
+    if (!resume) {
+      return false;
+    }
+    if (resume.isPublic === true) {
+      return true;
+    }
+
+    const callerId = await getCurrentUserId();
+    return callerId === resume.userId;
+  } catch (error: any) {
+    console.error(`Failed to check resume visibility: ${error.message}`);
+    return false;
   }
 }
 
@@ -127,6 +181,7 @@ export async function updateResume({
     email: string;
     summary: string;
     themeColor: string;
+    isPublic: boolean;
   }>;
 }) {
   try {
@@ -157,6 +212,7 @@ export async function addExperienceToResume(
 ) {
   try {
     const resume = await assertResumeOwner(resumeId);
+    const previousExperienceIds = resume.experience ?? [];
 
     const savedExperiences = await Promise.all(
       experienceDataArray.map(async (experienceData: any) => {
@@ -182,6 +238,8 @@ export async function addExperienceToResume(
 
     const updatedResume = await resume.save();
 
+    await deleteOrphans(Experience, previousExperienceIds, experienceIds);
+
     return { success: true, data: JSON.stringify(updatedResume) };
   } catch (error: any) {
     console.error("Error adding or updating experience to resume: ", error);
@@ -195,6 +253,7 @@ export async function addEducationToResume(
 ) {
   try {
     const resume = await assertResumeOwner(resumeId);
+    const previousEducationIds = resume.education ?? [];
 
     const savedEducation = await Promise.all(
       educationDataArray.map(async (educationData: any) => {
@@ -218,6 +277,8 @@ export async function addEducationToResume(
 
     const updatedResume = await resume.save();
 
+    await deleteOrphans(Education, previousEducationIds, educationIds);
+
     return { success: true, data: JSON.stringify(updatedResume) };
   } catch (error: any) {
     console.error("Error adding or updating education to resume: ", error);
@@ -228,6 +289,7 @@ export async function addEducationToResume(
 export async function addSkillToResume(resumeId: string, skillDataArray: any) {
   try {
     const resume = await assertResumeOwner(resumeId);
+    const previousSkillIds = resume.skills ?? [];
 
     const savedSkills = await Promise.all(
       skillDataArray.map(async (skillData: any) => {
@@ -249,6 +311,8 @@ export async function addSkillToResume(resumeId: string, skillDataArray: any) {
 
     const updatedResume = await resume.save();
 
+    await deleteOrphans(Skill, previousSkillIds, skillIds);
+
     return { success: true, data: JSON.stringify(updatedResume) };
   } catch (error: any) {
     console.error("Error adding or updating skill to resume: ", error);
@@ -258,7 +322,14 @@ export async function addSkillToResume(resumeId: string, skillDataArray: any) {
 
 export async function deleteResume(resumeId: string, path: string) {
   try {
-    await assertResumeOwner(resumeId);
+    const resume = await assertResumeOwner(resumeId);
+
+    // Cascade: remove the resume's sub-documents so they don't orphan.
+    await Promise.all([
+      Experience.deleteMany({ _id: { $in: resume.experience ?? [] } }),
+      Education.deleteMany({ _id: { $in: resume.education ?? [] } }),
+      Skill.deleteMany({ _id: { $in: resume.skills ?? [] } }),
+    ]);
 
     await Resume.findOneAndDelete({ resumeId: resumeId });
 

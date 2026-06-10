@@ -8,8 +8,9 @@ import React, { useEffect, useState } from "react";
 import ResumePreview from "@/components/layout/my-resume/ResumePreview";
 import { usePathname } from "next/navigation";
 import PageWrapper from "@/components/common/PageWrapper";
-import { DownloadIcon, Share2Icon } from "lucide-react";
-import { fetchResume } from "@/lib/actions/resume.actions";
+import { DownloadIcon, Globe, Lock, Share2Icon } from "lucide-react";
+import { fetchResume, updateResume } from "@/lib/actions/resume.actions";
+import { useToast } from "@/components/ui/use-toast";
 
 interface FinalResumeViewProps {
   params: { id: string };
@@ -21,19 +22,56 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
   isOwnerView,
 }) => {
   const path = usePathname();
+  const { toast } = useToast();
   const [formData, setFormData] = useState<any>({});
+  const [isPublic, setIsPublic] = useState(false);
+  const [isTogglingVisibility, setIsTogglingVisibility] = useState(false);
 
   useEffect(() => {
     const loadResumeData = async () => {
       try {
         const resumeData = await fetchResume(params.id);
-        setFormData(JSON.parse(resumeData));
+        const parsed = JSON.parse(resumeData);
+        setFormData(parsed);
+        if (parsed) {
+          setIsPublic(parsed.isPublic === true);
+        }
       } catch (error) {
         console.error("Error fetching resume:", error);
       }
     };
     loadResumeData();
   }, [params.id]);
+
+  const toggleVisibility = async () => {
+    const next = !isPublic;
+    setIsTogglingVisibility(true);
+
+    const result = await updateResume({
+      resumeId: params.id,
+      updates: { isPublic: next },
+    });
+
+    setIsTogglingVisibility(false);
+
+    if (result.success) {
+      setIsPublic(next);
+      toast({
+        title: next ? "Resume is now public" : "Resume is now private",
+        description: next
+          ? "Anyone with the link can view it."
+          : "Only you can view it now.",
+        className: "bg-white",
+      });
+    } else {
+      toast({
+        title: "Uh Oh! Something went wrong.",
+        description: result?.error,
+        variant: "destructive",
+        className: "bg-white",
+      });
+    }
+  };
 
   const sanitize = (str: string | undefined | null): string =>
     str?.trim().replace(/\s+/g, "_") || "User_Resume";
@@ -111,6 +149,32 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
                   </Button>
                 </RWebShare>
               </div>
+              {isOwnerView && (
+                <div className="flex flex-col items-center gap-2 -mt-4 mb-6">
+                  <Button
+                    variant="outline"
+                    className="flex gap-2 rounded-full"
+                    disabled={isTogglingVisibility}
+                    onClick={toggleVisibility}
+                  >
+                    {isPublic ? (
+                      <>
+                        <Globe className="size-5" /> Public — anyone with the
+                        link
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="size-5" /> Private — only you
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-xs text-gray-500">
+                    {isPublic
+                      ? "Click to make this resume private."
+                      : "Click to make this resume shareable by link."}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           <div className="px-10 pt-4 pb-16 max-sm:px-5 max-sm:pb-8 print:p-0">
