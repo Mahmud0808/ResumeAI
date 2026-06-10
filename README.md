@@ -10,6 +10,7 @@
     <img src="https://img.shields.io/badge/-Tailwind_CSS-black?style=for-the-badge&logoColor=white&logo=tailwindcss&color=3FBFF8" alt="tailwindcss" />
     <img src="https://img.shields.io/badge/-NextAuth-black?style=for-the-badge&logoColor=white&logo=auth0&color=7C3AFF" alt="nextauth" />
     <img src="https://img.shields.io/badge/-Typescript-black?style=for-the-badge&logoColor=white&logo=typescript&color=387CC8" alt="typescript" />
+    <img src="https://img.shields.io/badge/-Framer_Motion-black?style=for-the-badge&logoColor=white&logo=framer&color=E649A2" alt="framer motion" />
   </div>
 
   <h2 align="center">ResumeAI</h2>
@@ -23,35 +24,68 @@
 
 ## <a name="features">✨ Features</a>
 
-- **AI-Powered Resume Generation:** Generate a professional resume using AI.
+### 🤖 AI-Powered Writing
 
-- **Multiple Templates:** Choose from a growing collection of professionally designed templates (Classic, Modern, Elegant, Minimal, Sidebar, and more) with preset theme colors or a custom color picker.
+- **AI-Generated Content:** Generate professional summaries, work experience descriptions, and education descriptions with Gemini AI — each with multiple suggestions at different experience levels to pick from.
+- **One-Click Apply:** Click any AI suggestion to drop it straight into the form.
+
+### 🎨 Templates & Styling
+
+- **Multiple Templates:** Choose from a growing collection of professionally designed templates (Classic, Modern, Elegant, Minimal, Sidebar, Executive, Compact, Bold) — each with a live layout thumbnail in the picker.
+- **Theme Colors:** 14 curated preset colors plus a custom color picker for any brand color you want.
+- **Date Formats:** 15 date formats covering global conventions — month-year, US, UK/EU, German dotted, ISO, and East Asian styles.
+- **Live Preview:** Side-by-side editor and preview with instant updates as you type, scaled to fit any screen size.
+
+### 🧩 Flexible Sections
+
+- **Drag-and-Drop Reordering:** Rearrange experience, education, skills, and custom sections by dragging them directly in the preview. Order is saved automatically.
+- **Hideable Sections:** Hide any built-in section (summary, experience, education, skills) without losing its data.
+- **Custom Sections:** Add your own sections — certifications, projects, languages, anything — with full rich-text support.
+- **Skills, Two Ways:** Show skills as rating bars, or as an ATS-friendly plain list with optional groups (Backend, Frontend, Tools, ...).
+
+### 📄 Sharing & Export
+
+- **ATS-Friendly PDF Export:** Download a real vector-text PDF via native print — selectable, parseable text with no non-breaking-space artifacts.
+- **Shareable Links:** Every resume gets a clean `/resume/<id>` URL. Resumes are private by default with an opt-in public toggle; old link formats redirect permanently.
+- **Web Share:** Share your resume URL through the native share sheet.
+
+### 📊 Dashboard
+
+- **Live Card Previews:** Every resume card renders a mini preview of its actual template, theme color, name, and job title — no two cards look the same.
+- **Newest First:** Recently created resumes appear at the front.
+- **Quick Actions:** Edit, view, or delete any resume from its card menu.
+
+### 🔐 Security & Accounts
 
 - **User Authentication:** Secure login and registration with NextAuth (Google OAuth + email/password), with brute-force rate limiting.
+- **Ownership Checks:** Server-side ownership verification on every mutation; private resumes are unreadable by non-owners.
 
-- **Real-Time Preview:** See live updates as you fill out the resume form, plus per-resume template thumbnails on the dashboard.
+### 💅 Experience
 
-- **Easy Customization:** Edit sections like experience, education, skills, and more.
-
-- **Save and Share:** Save your resume and share a private link; resumes are private by default with an opt-in public toggle.
-
-- **PDF Export:** Download an ATS-friendly, vector PDF via native print.
-
-- **Responsiveness:** Ensures the application adapts seamlessly to various screen sizes and devices.
+- **Modern SaaS UI:** Glassmorphism, gradient accents, layered shadows, and a fully responsive mobile-first layout.
+- **Fluid Animations:** Framer Motion page transitions, staggered lists, micro-interactions, and scroll reveals throughout.
 
 ## <a name="tech-stack">⚙️ Tech Stack</a>
 
-- **Frontend:** Next.js 14
+- **Framework:** Next.js (App Router)
+
+- **Language:** TypeScript
 
 - **Authentication:** NextAuth (Auth.js v5)
 
 - **AI Integration:** Gemini API
 
-- **Styling:** TailwindCSS
+- **Styling:** Tailwind CSS
 
-- **Backend:** Node.js
+- **Animations:** Framer Motion
 
-- **Database:** MongoDB
+- **Forms & Validation:** React Hook Form + Zod
+
+- **Rich Text:** Quill
+
+- **Database:** MongoDB + Mongoose
+
+- **Testing:** Vitest
 
 ## <a name="quick-start">🚀 Quick Start</a>
 
@@ -113,6 +147,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to view the 
 
 ```bash
 npm test
+```
+
+### Building for Production
+
+```bash
+npm run build
 ```
 
 ## 🤝 Contributing
