@@ -46,7 +46,7 @@ const EducationalPreview = () => {
             </span>
           </h2>
           {education?.description && (
-            <p className="text-xs my-2 text-justify">{education?.description}</p>
+            <p className="text-xs my-2 text-justify break-words">{education?.description}</p>
           )}
         </div>
       ))}

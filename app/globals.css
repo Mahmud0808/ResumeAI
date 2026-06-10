@@ -116,8 +116,19 @@
 }
 
 /* Form Preview */
+.form-preview {
+  /* Last-resort wrap for tokens longer than a full line (URLs etc.);
+     normal words are never split. */
+  overflow-wrap: break-word;
+}
+
+.form-preview * {
+  max-width: 100% !important;
+  white-space: normal !important;
+}
+
 .form-preview ol {
-  @apply list-decimal ml-80;
+  @apply list-decimal ml-8;
 }
 
 .form-preview ul {
@@ -165,6 +176,19 @@
 @media print {
   #no-print {
     display: none !important;
+  }
+
+  /* Print the sheet unscaled: the on-screen fit-to-width transform must not
+     leak into the PDF. */
+  .resume-scale-outer {
+    width: auto !important;
+    height: auto !important;
+  }
+
+  .resume-scale-inner {
+    position: static !important;
+    transform: none !important;
+    width: auto !important;
   }
 
   #print-area {

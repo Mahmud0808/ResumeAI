@@ -2,9 +2,7 @@
 
 import React from "react";
 import EditableSection from "./EditableSection";
-import SummaryPreview from "../previews/SummaryPreview";
-import ExperiencePreview from "../previews/ExperiencePreview";
-import EducationalPreview from "../previews/EducationalPreview";
+import BodySections from "./BodySections";
 
 const SidebarTemplate = ({
   formData,
@@ -59,23 +57,15 @@ const SidebarTemplate = ({
       )}
     </div>
 
-    {/* Main column: summary + experience + education */}
+    {/* Main column: summary + reorderable experience/education (skills stay
+        pinned in the sidebar) */}
     <div className="w-[66%] p-8">
-      <EditableSection index={2} isEditMode={isEditMode} onSelect={onSelect}>
-        <SummaryPreview />
-      </EditableSection>
-
-      {formData?.experience?.length > 0 && (
-        <EditableSection index={3} isEditMode={isEditMode} onSelect={onSelect}>
-          <ExperiencePreview />
-        </EditableSection>
-      )}
-
-      {formData?.education?.length > 0 && (
-        <EditableSection index={4} isEditMode={isEditMode} onSelect={onSelect}>
-          <EducationalPreview />
-        </EditableSection>
-      )}
+      <BodySections
+        formData={formData}
+        isEditMode={isEditMode}
+        onSelect={onSelect}
+        sections={["experience", "education"]}
+      />
     </div>
   </div>
 );

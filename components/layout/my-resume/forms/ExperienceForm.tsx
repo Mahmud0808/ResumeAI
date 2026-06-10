@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { ExperienceValidationSchema } from "@/lib/validations/resume";
 import { experienceFields } from "@/lib/fields";
+import { sanitizeNbsp } from "@/lib/utils";
 
 const ExperienceForm = ({ params }: { params: { id: string } }) => {
   const listRef = useRef<HTMLDivElement>(null);
@@ -155,7 +156,12 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
 
   const onSave = async (data: z.infer<typeof ExperienceValidationSchema>) => {
     setIsLoading(true);
-    const result = await addExperienceToResume(params.id, data.experience);
+    // Store ATS-friendly HTML: no &nbsp; runs from Quill.
+    const experience = data.experience.map((entry) => ({
+      ...entry,
+      workSummary: sanitizeNbsp(entry.workSummary || ""),
+    }));
+    const result = await addExperienceToResume(params.id, experience);
 
     if (result.success) {
       toast({
@@ -166,7 +172,7 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
       handleInputChange({
         target: {
           name: "experience",
-          value: data.experience,
+          value: experience,
         },
       });
     } else {

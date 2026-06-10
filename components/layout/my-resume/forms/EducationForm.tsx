@@ -243,11 +243,11 @@ const EducationForm = ({ params }: { params: { id: string } }) => {
                           {config.type === "textarea" ? (
                             <Textarea
                               {...field}
+                              value={(field.value as string) || ""}
                               onChange={(e) => {
                                 field.onChange(e);
                                 handleChange(index, e);
                               }}
-                              defaultValue={(field.value as string) || ""}
                               className={`no-focus ${
                                 form.formState.errors.education?.[index]?.[
                                   config.name

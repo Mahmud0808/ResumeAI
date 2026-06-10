@@ -15,6 +15,7 @@ import TemplatePicker from "@/components/layout/TemplatePicker";
 import { useToast } from "@/components/ui/use-toast";
 import { useFormContext } from "@/lib/context/FormProvider";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
+import { sanitizeNbsp } from "@/lib/utils";
 
 // Slides forward on Next, backward on Prev (direction: 1 or -1).
 const stepVariants: Variants = {
@@ -107,7 +108,11 @@ const ResumeEditForm = ({
 
                 const experienceResult = await addExperienceToResume(
                   params.id,
-                  updates.experience
+                  // Keep stored HTML ATS-friendly: no &nbsp; runs from Quill.
+                  (updates.experience ?? []).map((entry: any) => ({
+                    ...entry,
+                    workSummary: sanitizeNbsp(entry?.workSummary || ""),
+                  }))
                 );
 
                 const educationResult = await addEducationToResume(

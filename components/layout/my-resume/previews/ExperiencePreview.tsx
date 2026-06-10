@@ -1,5 +1,5 @@
 import { useFormContext } from "@/lib/context/FormProvider";
-import { themeColors } from "@/lib/utils";
+import { sanitizeNbsp, themeColors } from "@/lib/utils";
 import React from "react";
 
 const ExperiencePreview = () => {
@@ -49,9 +49,13 @@ const ExperiencePreview = () => {
           </h2>
           {experience?.workSummary && (
             <div
-              className="text-xs text-justify my-2 form-preview"
+              className="text-xs text-justify my-2 break-words form-preview"
               dangerouslySetInnerHTML={{
-                __html: experience?.workSummary,
+                // Quill turns consecutive spaces into &nbsp; runs, which are
+                // unbreakable, push lines past the sheet edge, and confuse
+                // ATS parsers. Covers resumes saved before save-time
+                // sanitizing was added.
+                __html: sanitizeNbsp(experience.workSummary),
               }}
             />
           )}

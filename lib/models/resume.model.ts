@@ -18,6 +18,11 @@ const resumeSchema = new mongoose.Schema({
   skills: [{ type: mongoose.Schema.Types.ObjectId, ref: "Skill" }],
   themeColor: { type: String, default: themeColors[0] },
   template: { type: String, default: "classic" },
+  // Display order of the reorderable body sections (summary stays fixed).
+  sectionOrder: {
+    type: [String],
+    default: ["experience", "education", "skills"],
+  },
   // Opt-in sharing: resumes are private until the owner makes them public.
   isPublic: { type: Boolean, default: false },
 });

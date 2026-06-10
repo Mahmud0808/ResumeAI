@@ -39,3 +39,12 @@ export type ResumeTemplateId = (typeof resumeTemplates)[number]["id"];
 export const stripHtml = (html: string): string => {
   return html.replace(/<[^>]*>/g, "").trim();
 };
+
+/**
+ * Replaces non-breaking spaces (Quill emits them for consecutive spaces)
+ * with regular spaces. Keeps resume text ATS-parseable and lets the
+ * browser wrap lines at word boundaries.
+ */
+export const sanitizeNbsp = (html: string): string => {
+  return html.replace(/&nbsp;|\u00A0/g, " ");
+};
