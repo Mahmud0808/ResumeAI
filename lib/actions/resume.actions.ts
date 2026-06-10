@@ -181,6 +181,7 @@ export async function updateResume({
     email: string;
     summary: string;
     themeColor: string;
+    template: string;
     isPublic: boolean;
   }>;
 }) {

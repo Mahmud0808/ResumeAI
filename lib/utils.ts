@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const themeColors = [
-  "#90A4AE", // Light Grey Blue
+  "#212121", // Soft Black
   "#E57373", // Light Red
   "#64B5F6", // Light Blue
   "#81C784", // Light Green
@@ -22,6 +22,16 @@ export const themeColors = [
   "#FFD54F", // Light Amber
   "#FFEB3B", // Bright Yellow
 ];
+
+export const resumeTemplates = [
+  { id: "classic", name: "Classic" },
+  { id: "modern", name: "Modern" },
+  { id: "elegant", name: "Elegant" },
+  { id: "minimal", name: "Minimal" },
+  { id: "sidebar", name: "Sidebar" },
+] as const;
+
+export type ResumeTemplateId = (typeof resumeTemplates)[number]["id"];
 
 export const stripHtml = (html: string): string => {
   return html.replace(/<[^>]*>/g, "").trim();

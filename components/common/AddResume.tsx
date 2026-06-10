@@ -62,8 +62,6 @@ const AddResume = () => {
     });
 
     if (result.success) {
-      form.reset();
-
       const resume = JSON.parse(result.data!);
 
       router.push(`/my-resume/${resume.resumeId}/edit`);
@@ -88,7 +86,16 @@ const AddResume = () => {
         <PlusSquare className="text-slate-500" />
       </div>
 
-      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+      <Dialog
+        open={openDialog}
+        onOpenChange={(open) => {
+          setOpenDialog(open);
+          // Clear the title only once the dialog is dismissed, not on create.
+          if (!open) {
+            form.reset({ name: "" });
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Resume</DialogTitle>

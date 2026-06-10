@@ -17,6 +17,7 @@ const resumeSchema = new mongoose.Schema({
   education: [{ type: mongoose.Schema.Types.ObjectId, ref: "Education" }],
   skills: [{ type: mongoose.Schema.Types.ObjectId, ref: "Skill" }],
   themeColor: { type: String, default: themeColors[0] },
+  template: { type: String, default: "classic" },
   // Opt-in sharing: resumes are private until the owner makes them public.
   isPublic: { type: Boolean, default: false },
 });

@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import QuillEditor from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import dynamic from "next/dynamic";
+import "react-quill-new/dist/quill.snow.css";
+
+// Load client-side only — Quill touches `document`/`window` at import time.
+const QuillEditor = dynamic(() => import("react-quill-new"), { ssr: false });
 
 const RichTextEditor = ({
   onRichTextEditorChange,
