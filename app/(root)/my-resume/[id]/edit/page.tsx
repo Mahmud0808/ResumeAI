@@ -5,6 +5,7 @@ import { getCurrentUserId } from "@/lib/auth";
 import { checkResumeOwnership } from "@/lib/actions/resume.actions";
 import { redirect } from "next/navigation";
 import ResumeEditor from "@/components/layout/my-resume/ResumeEditor";
+import { FadeIn } from "@/components/common/motion";
 
 const EditResume = async ({
   params,
@@ -22,12 +23,14 @@ const EditResume = async ({
   return (
     <PageWrapper>
       <Header />
-      <div className="my-10 mx-10 md:mx-20 lg:mx-36">
-        <h2 className="text-center text-2xl font-bold">Edit Your Resume</h2>
-        <p className="text-center text-gray-600">
+      <FadeIn className="my-8 mx-6 sm:mx-10 md:my-10 md:mx-20 lg:mx-36">
+        <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+          Edit Your Resume
+        </h2>
+        <p className="mt-1 text-center text-sm text-gray-600 md:text-base">
           Please provide the necessary information for your resume.
         </p>
-      </div>
+      </FadeIn>
       <ResumeEditor params={{ id }} userId={userId ?? undefined} />
     </PageWrapper>
   );

@@ -60,9 +60,9 @@ const TemplatePicker = ({ params }: { params: { id: string } }) => {
             <button
               key={template.id}
               onClick={() => onSelect(template.id)}
-              className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition-all hover:bg-slate-50 ${
+              className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition-all duration-200 hover:bg-slate-50 hover:shadow-sm active:scale-[0.98] ${
                 selected === template.id
-                  ? "border-primary-700"
+                  ? "border-primary-700 bg-primary-50/50 shadow-sm"
                   : "border-slate-200"
               }`}
             >

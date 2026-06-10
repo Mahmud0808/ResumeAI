@@ -7,6 +7,7 @@ import { generateSummary } from "@/lib/actions/gemini.actions";
 import { updateResume } from "@/lib/actions/resume.actions";
 import { useFormContext } from "@/lib/context/FormProvider";
 import { Brain, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 import React, { useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -104,7 +105,7 @@ const SummaryForm = ({ params }: { params: { id: string } }) => {
 
   return (
     <div>
-      <div className="p-5 shadow-lg rounded-lg border-t-primary-700 border-t-4 bg-white">
+      <div className="p-5 sm:p-6 shadow-lg shadow-slate-200/60 rounded-xl border border-slate-200/60 border-t-primary-700 border-t-4 bg-white">
         <h2 className="text-lg font-semibold leading-none tracking-tight">
           Summary
         </h2>
@@ -175,17 +176,31 @@ const SummaryForm = ({ params }: { params: { id: string } }) => {
       </div>
 
       {aiGeneratedSummaryList.length > 0 && (
-        <div className="my-5" ref={listRef}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="my-5"
+          ref={listRef}
+        >
           <h2 className="font-bold text-lg">Suggestions</h2>
           {aiGeneratedSummaryList?.map((item: any, index: number) => (
-            <div
+            <motion.div
               key={index}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.4,
+                delay: index * 0.08,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              whileHover={{ scale: 1.01, y: -2 }}
               onClick={() =>
                 handleSummaryChange({
                   target: { name: "summary", value: item?.summary },
                 })
               }
-              className={`p-5 shadow-lg my-4 rounded-lg border-t-2 ${
+              className={`p-5 shadow-lg shadow-slate-200/60 hover:shadow-xl hover:shadow-primary-700/10 transition-shadow my-4 rounded-xl border border-slate-200/60 border-t-2 border-t-primary-500 bg-white ${
                 isAiLoading ? "cursor-not-allowed" : "cursor-pointer"
               }`}
               aria-disabled={isAiLoading}
@@ -194,9 +209,9 @@ const SummaryForm = ({ params }: { params: { id: string } }) => {
                 Level: {item?.experience_level}
               </h2>
               <p className="text-justify text-gray-600">{item?.summary}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );

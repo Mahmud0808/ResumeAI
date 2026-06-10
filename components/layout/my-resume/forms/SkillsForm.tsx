@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Rating } from "@smastrom/react-rating";
 import { Loader2, Minus, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import "@smastrom/react-rating/style.css";
 import { addSkillToResume } from "@/lib/actions/resume.actions";
 import { useToast } from "@/components/ui/use-toast";
@@ -105,7 +106,7 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
   };
 
   return (
-    <div className="p-5 shadow-lg rounded-lg border-t-primary-700 border-t-4 bg-white">
+    <div className="p-5 sm:p-6 shadow-lg shadow-slate-200/60 rounded-xl border border-slate-200/60 border-t-primary-700 border-t-4 bg-white">
       <h2 className="text-lg font-semibold leading-none tracking-tight">
         Skill Sets
       </h2>
@@ -115,14 +116,20 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSave)} className="mt-5">
+          <AnimatePresence initial={false}>
           {fields.map((item, index) => (
-            <div
+            <motion.div
               key={item.id}
+              layout
+              initial={{ opacity: 0, y: 16, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.2 } }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               className={`flex max-lg:flex-col ${
                 form.formState.errors.skills?.[index]?.name
                   ? "lg:items-center"
                   : "lg:items-end"
-              } justify-between mb-2 border rounded-lg p-3 space-y-2 lg:space-x-12`}
+              } justify-between mb-2 border border-slate-200/80 rounded-xl bg-slate-50/50 p-3 sm:p-4 space-y-2 lg:space-x-12`}
             >
               <FormField
                 control={form.control}
@@ -166,9 +173,10 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
                   />
                 )}
               />
-            </div>
+            </motion.div>
           ))}
-          <div className="mt-5 flex gap-2 justify-between">
+          </AnimatePresence>
+          <div className="mt-5 flex flex-wrap gap-2 justify-between">
             <div className="flex gap-2">
               <Button
                 variant="outline"

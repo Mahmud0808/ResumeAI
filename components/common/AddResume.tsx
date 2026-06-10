@@ -29,6 +29,7 @@ import { createResume } from "@/lib/actions/resume.actions";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next-nprogress-bar";
 import { useSession } from "next-auth/react";
+import { motion } from "framer-motion";
 
 const AddResume = () => {
   const router = useRouter();
@@ -79,12 +80,15 @@ const AddResume = () => {
 
   return (
     <>
-      <div
-        className="relative aspect-[1/1.2] border border-dashed border-slate-300 flex items-center justify-center bg-slate-100 rounded-xl hover:scale-105 hover:shadow-md transition-all cursor-pointer"
+      <motion.div
+        whileHover={{ scale: 1.04, y: -4 }}
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: "spring", stiffness: 300, damping: 22 }}
+        className="group relative aspect-[1/1.2] border border-dashed border-slate-300 flex items-center justify-center bg-slate-100/80 rounded-xl hover:border-primary-400 hover:bg-primary-50/60 hover:shadow-lg hover:shadow-primary-700/10 transition-colors cursor-pointer"
         onClick={() => isSignedIn && setOpenDialog(true)}
       >
-        <PlusSquare className="text-slate-500" />
-      </div>
+        <PlusSquare className="text-slate-500 transition-colors group-hover:text-primary-600" />
+      </motion.div>
 
       <Dialog
         open={openDialog}

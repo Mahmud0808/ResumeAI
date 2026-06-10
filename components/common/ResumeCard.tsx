@@ -26,6 +26,7 @@ import { useRouter } from "next-nprogress-bar";
 import { deleteResume } from "@/lib/actions/resume.actions";
 import { useToast } from "../ui/use-toast";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 
 const ResumeCard = ({
   resume,
@@ -36,9 +37,9 @@ const ResumeCard = ({
 }) => {
   if (!resume) {
     return (
-      <div className="!bg-slate-200/30 relative aspect-[1/1.2] rounded-lg shadow-lg flex flex-col hover:scale-105 transition-all skeleton">
+      <div className="!bg-slate-200/30 relative aspect-[1/1.2] rounded-xl shadow-md flex flex-col skeleton">
         <div className="flex-1"></div>
-        <div className="border-0 p-3 flex justify-between bg-white/40 rounded-b-lg">
+        <div className="border-0 p-3 flex justify-between bg-white/40 rounded-b-xl">
           ‎{" "}
         </div>
       </div>
@@ -79,24 +80,34 @@ const ResumeCard = ({
   };
 
   return (
-    <div className="relative aspect-[1/1.2] flex flex-col hover:scale-105 transition-all">
+    <motion.div
+      whileHover={{ scale: 1.04, y: -4 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 300, damping: 22 }}
+      className="group relative aspect-[1/1.2] flex flex-col rounded-xl shadow-md transition-shadow duration-300 hover:shadow-xl hover:shadow-primary-700/10"
+    >
       <Link
-        href={"/my-resume/" + myResume.resumeId + "/view"}
+        href={"/resume/" + myResume.resumeId}
         className="flex-grow"
       >
         <div
-          className="bg-gradient-to-b from-pink-100 via-purple-200 to-blue-200 rounded-t-lg border-t-4 h-full"
+          className="bg-gradient-to-b from-pink-100 via-purple-200 to-blue-200 rounded-t-xl border-t-4 h-full"
           style={{
             borderColor: myResume?.themeColor,
           }}
         >
           <div className="flex size-full items-center justify-center">
-            <img src="/img/blank-cv.png" width={80} height={80} />
+            <img
+              src="/img/blank-cv.png"
+              width={80}
+              height={80}
+              className="transition-transform duration-300 group-hover:scale-105"
+            />
           </div>
         </div>
       </Link>
 
-      <div className="border p-3 flex justify-between bg-white rounded-b-lg shadow-lg">
+      <div className="border border-slate-200/80 p-3 flex justify-between bg-white rounded-b-xl">
         <h2 className="text-sm font-medium text-slate-700 mr-4 block whitespace-nowrap overflow-hidden text-ellipsis">
           {myResume.title}
         </h2>
@@ -117,7 +128,7 @@ const ResumeCard = ({
 
             <DropdownMenuItem
               onClick={() =>
-                router.push("/my-resume/" + myResume.resumeId + "/view")
+                router.push("/resume/" + myResume.resumeId)
               }
             >
               View
@@ -159,7 +170,7 @@ const ResumeCard = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </motion.div>
   );
 };
 

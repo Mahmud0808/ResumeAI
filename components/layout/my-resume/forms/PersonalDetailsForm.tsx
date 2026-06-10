@@ -77,7 +77,7 @@ const PersonalDetailsForm = ({ params }: { params: { id: string } }) => {
   };
 
   return (
-    <div className="p-5 shadow-lg rounded-lg border-t-primary-700 border-t-4 bg-white">
+    <div className="p-5 sm:p-6 shadow-lg shadow-slate-200/60 rounded-xl border border-slate-200/60 border-t-primary-700 border-t-4 bg-white">
       <h2 className="text-lg font-semibold leading-none tracking-tight">
         Personal Details
       </h2>

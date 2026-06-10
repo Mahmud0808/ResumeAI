@@ -11,6 +11,8 @@ import PageWrapper from "@/components/common/PageWrapper";
 import { DownloadIcon, Globe, Lock, Share2Icon } from "lucide-react";
 import { fetchResume, updateResume } from "@/lib/actions/resume.actions";
 import { useToast } from "@/components/ui/use-toast";
+import { motion } from "framer-motion";
+import { FadeIn } from "@/components/common/motion";
 
 interface FinalResumeViewProps {
   params: { id: string };
@@ -105,35 +107,41 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
         <FormProvider params={params}>
           <div id="no-print">
             <Header />
-            <div className="my-10 mx-10 md:mx-20 lg:mx-36">
+            <FadeIn className="my-8 mx-6 sm:mx-10 md:my-10 md:mx-20 lg:mx-36">
               {isOwnerView ? (
                 <>
-                  <h2 className="text-center text-2xl font-bold">
+                  <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
                     Congrats! Your ultimate AI-generated resume is ready!
                   </h2>
-                  <p className="text-center text-gray-600">
+                  <p className="mt-1 text-center text-sm text-gray-600 md:text-base">
                     You can now download your resume or share its unique URL
                     with your friends and family.
                   </p>
                 </>
               ) : (
                 <>
-                  <h2 className="text-center text-2xl font-bold">
+                  <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
                     Resume Preview
                   </h2>
-                  <p className="text-center text-gray-600">
+                  <p className="mt-1 text-center text-sm text-gray-600 md:text-base">
                     You are currently viewing a preview of someone else's
                     resume.
                   </p>
                 </>
               )}
-              <div className="flex max-sm:flex-col justify-center gap-8 my-10">
-                <Button
-                  className="flex px-12 py-6 gap-2 rounded-full bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-700/30 text-white"
-                  onClick={() => handleDownloadPDF()}
+              <div className="mx-auto my-8 flex w-fit max-sm:w-full max-sm:flex-col items-center justify-center gap-4 rounded-full max-sm:rounded-3xl border border-slate-200/70 bg-white/70 p-3 shadow-lg shadow-slate-900/5 backdrop-blur-xl sm:gap-6 md:my-10">
+                <motion.div
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  className="max-sm:w-full"
                 >
-                  <DownloadIcon className="size-6" /> Download
-                </Button>
+                  <Button
+                    className="flex w-full px-10 py-6 gap-2 rounded-full bg-primary-700 hover:bg-primary-800 shadow-md shadow-primary-700/25 focus:ring-4 focus:ring-primary-700/30 text-white sm:px-12"
+                    onClick={() => handleDownloadPDF()}
+                  >
+                    <DownloadIcon className="size-6" /> Download
+                  </Button>
+                </motion.div>
                 <RWebShare
                   data={{
                     text: "Check out my resume!",
@@ -144,7 +152,7 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
                   }}
                   onClick={() => console.log("Shared successfully!")}
                 >
-                  <Button className="flex px-12 py-6 gap-2 rounded-full bg-slate-200 hover:bg-primary-700/20 focus:ring-4 focus:ring-primary-700/30 text-black">
+                  <Button className="flex max-sm:w-full px-10 py-6 gap-2 rounded-full bg-slate-100 hover:bg-primary-700/10 focus:ring-4 focus:ring-primary-700/30 text-slate-900 sm:px-12">
                     <Share2Icon className="size-6" /> Share URL
                   </Button>
                 </RWebShare>
@@ -175,7 +183,7 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
                   </p>
                 </div>
               )}
-            </div>
+            </FadeIn>
           </div>
           <div className="px-10 pt-4 pb-16 max-sm:px-5 max-sm:pb-8 print:p-0">
             <div id="print-area">

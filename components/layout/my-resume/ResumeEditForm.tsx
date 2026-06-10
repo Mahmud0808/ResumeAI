@@ -14,6 +14,7 @@ import ThemeColor from "@/components/layout/ThemeColor";
 import TemplatePicker from "@/components/layout/TemplatePicker";
 import { useToast } from "@/components/ui/use-toast";
 import { useFormContext } from "@/lib/context/FormProvider";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   addEducationToResume,
   addExperienceToResume,
@@ -39,7 +40,7 @@ const ResumeEditForm = ({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex justify-between">
+      <div className="sticky top-0 z-10 -mx-1 flex justify-between gap-2 rounded-xl border border-slate-200/60 bg-white/70 px-3 py-2 shadow-sm backdrop-blur-xl">
         <div className="flex gap-2">
           <ThemeColor params={params} />
           <TemplatePicker params={params} />
@@ -113,7 +114,7 @@ const ResumeEditForm = ({
                   educationResult.success &&
                   skillsResult.success
                 ) {
-                  router.push("/my-resume/" + params.id + "/view");
+                  router.push("/resume/" + params.id);
                 } else {
                   toast({
                     title: "Uh Oh! Something went wrong.",
@@ -149,19 +150,31 @@ const ResumeEditForm = ({
           </Button>
         </div>
       </div>
-      {activeFormIndex === 1 ? (
-        <PersonalDetailsForm params={params} />
-      ) : activeFormIndex === 2 ? (
-        <SummaryForm params={params} />
-      ) : activeFormIndex === 3 ? (
-        <ExperienceForm params={params} />
-      ) : activeFormIndex === 4 ? (
-        <EducationForm params={params} />
-      ) : activeFormIndex === 5 ? (
-        <SkillsForm params={params} />
-      ) : activeFormIndex === 6 ? (
-        redirect("/my-resume/" + params.id + "/view")
-      ) : null}
+      {activeFormIndex === 6 ? (
+        redirect("/resume/" + params.id)
+      ) : (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeFormIndex}
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -24 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {activeFormIndex === 1 ? (
+              <PersonalDetailsForm params={params} />
+            ) : activeFormIndex === 2 ? (
+              <SummaryForm params={params} />
+            ) : activeFormIndex === 3 ? (
+              <ExperienceForm params={params} />
+            ) : activeFormIndex === 4 ? (
+              <EducationForm params={params} />
+            ) : activeFormIndex === 5 ? (
+              <SkillsForm params={params} />
+            ) : null}
+          </motion.div>
+        </AnimatePresence>
+      )}
     </div>
   );
 };

@@ -12,6 +12,7 @@ import { Check, LayoutGrid } from "lucide-react";
 import { themeColors } from "@/lib/utils";
 import { updateResume } from "@/lib/actions/resume.actions";
 import { useToast } from "../ui/use-toast";
+import { motion } from "framer-motion";
 
 const ThemeColor = ({ params }: { params: { id: string } }) => {
   const { toast } = useToast();
@@ -70,10 +71,13 @@ const ThemeColor = ({ params }: { params: { id: string } }) => {
         <h2 className="mb-3 text-sm font-bold">Select Theme Color</h2>
         <div className="grid grid-cols-5 gap-3">
           {themeColors.map((item, index) => (
-            <div
+            <motion.div
               key={index}
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
               onClick={() => onColorSelect(item)}
-              className="flex justify-center items-center h-8 w-8 rounded-lg cursor-pointer hover:scale-110 transition-all duration-300"
+              className="flex justify-center items-center h-8 w-8 rounded-lg cursor-pointer shadow-sm ring-1 ring-black/5"
               style={{
                 background: item,
               }}
@@ -81,7 +85,7 @@ const ThemeColor = ({ params }: { params: { id: string } }) => {
               {selectedColor == item && (
                 <Check color="#ffffff" strokeWidth={3} width={20} height={20} />
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
       </PopoverContent>

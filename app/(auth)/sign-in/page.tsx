@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import GoogleIcon from "@/components/common/GoogleIcon";
+import { motion } from "framer-motion";
 
 const SignInPage = () => {
   const router = useRouter();
@@ -44,9 +45,22 @@ const SignInPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-2xl border bg-white p-8 shadow-lg">
-        <h1 className="text-2xl font-bold text-slate-800">Welcome back</h1>
+    <div className="flex min-h-screen items-center justify-center p-4 sm:p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 24, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-md rounded-3xl border border-slate-200/70 bg-white/80 p-6 shadow-xl shadow-slate-900/5 backdrop-blur-xl sm:p-8"
+      >
+        <Link href="/" className="mb-6 flex items-center gap-2">
+          <img src="/icons/logo.svg" className="h-8" alt="logo" />
+          <span className="text-lg font-bold tracking-tight text-slate-900">
+            ResumeAI
+          </span>
+        </Link>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          Welcome back
+        </h1>
         <p className="mt-1 text-sm text-slate-500">
           Sign in to continue building your resume.
         </p>
@@ -116,11 +130,14 @@ const SignInPage = () => {
 
         <p className="mt-6 text-center text-sm text-slate-500">
           Don&apos;t have an account?{" "}
-          <Link href="/sign-up" className="font-semibold text-primary-700">
+          <Link
+            href="/sign-up"
+            className="font-semibold text-primary-700 transition-colors hover:text-primary-800 hover:underline"
+          >
             Sign up
           </Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };

@@ -8,6 +8,7 @@ import { generateExperienceDescription } from "@/lib/actions/gemini.actions";
 import { addExperienceToResume } from "@/lib/actions/resume.actions";
 import { useFormContext } from "@/lib/context/FormProvider";
 import { Brain, Loader2, Minus, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import React, { useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -181,7 +182,7 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
 
   return (
     <div>
-      <div className="p-5 shadow-lg rounded-lg border-t-primary-700 border-t-4 bg-white">
+      <div className="p-5 sm:p-6 shadow-lg shadow-slate-200/60 rounded-xl border border-slate-200/60 border-t-primary-700 border-t-4 bg-white">
         <h2 className="text-lg font-semibold leading-none tracking-tight">
           Professional Experience
         </h2>
@@ -191,10 +192,16 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSave)} className="mt-5">
+            <AnimatePresence initial={false}>
             {fields.map((item, index) => (
-              <div
+              <motion.div
                 key={item.id}
-                className="grid grid-cols-2 gap-3 border p-3 my-5 rounded-lg"
+                layout
+                initial={{ opacity: 0, y: 16, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.2 } }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                className="grid grid-cols-2 gap-3 border border-slate-200/80 p-3 sm:p-4 my-5 rounded-xl bg-slate-50/50"
               >
                 {experienceFields.map((config) => (
                   <FormField
@@ -264,9 +271,10 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
                     )}
                   />
                 ))}
-              </div>
+              </motion.div>
             ))}
-            <div className="mt-3 flex gap-2 justify-between">
+            </AnimatePresence>
+            <div className="mt-3 flex flex-wrap gap-2 justify-between">
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -304,11 +312,25 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
       </div>
 
       {aiGeneratedSummaryList.length > 0 && (
-        <div className="my-5" ref={listRef}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="my-5"
+          ref={listRef}
+        >
           <h2 className="font-bold text-lg">Suggestions</h2>
           {aiGeneratedSummaryList?.map((item: any, index: number) => (
-            <div
+            <motion.div
               key={index}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.4,
+                delay: index * 0.08,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              whileHover={{ scale: 1.01, y: -2 }}
               onClick={() => {
                 form.setValue(
                   `experience.${currentAiIndex}.workSummary`,
@@ -322,7 +344,7 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
                   },
                 });
               }}
-              className={`p-5 shadow-lg my-4 rounded-lg border-t-2 ${
+              className={`p-5 shadow-lg shadow-slate-200/60 hover:shadow-xl hover:shadow-primary-700/10 transition-shadow my-4 rounded-xl border border-slate-200/60 border-t-2 border-t-primary-500 bg-white ${
                 isAiLoading ? "cursor-not-allowed" : "cursor-pointer"
               }`}
               aria-disabled={isAiLoading}
@@ -331,9 +353,9 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
                 Level: {item?.activity_level}
               </h2>
               <p className="text-justify text-gray-600">{item?.description}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );

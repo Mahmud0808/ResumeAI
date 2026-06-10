@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       // Keep auth-gated and user-generated resume pages out of search results.
-      disallow: ["/dashboard", "/my-resume/"],
+      disallow: ["/dashboard", "/my-resume/", "/resume/"],
     },
     sitemap: `${BASE_URL}/sitemap.xml`,
   };
