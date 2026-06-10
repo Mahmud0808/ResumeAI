@@ -21,32 +21,42 @@ const Header = () => {
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="sticky top-0 z-50"
     >
-      <nav className="border-b border-slate-200/60 bg-white/70 px-4 py-2.5 shadow-sm backdrop-blur-xl sm:px-6">
-        <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
-          <Link href="/" className="group flex items-center">
-            <motion.img
-              whileHover={{ rotate: -8, scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300, damping: 18 }}
-              src="/icons/logo.svg"
-              className="mr-3 h-7 sm:h-9"
-              alt="logo"
-            />
-            <span className="self-center text-lg font-bold tracking-tight whitespace-nowrap text-slate-900 sm:text-xl">
-              ResumeAI
+      {/* Signature gradient strip */}
+      <div className="h-[3px] w-full bg-gradient-to-r from-primary-600 via-sky-400 to-purple-500" />
+
+      <nav className="border-b border-slate-900/10 bg-white/60 px-4 py-3 backdrop-blur-2xl supports-[backdrop-filter]:bg-white/60 sm:px-6">
+        <div className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between">
+          <Link href="/" className="group flex items-center gap-2.5">
+            <span className="relative inline-flex">
+              <span className="absolute inset-0 rounded-full bg-primary-400/40 opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100" />
+              <motion.img
+                whileHover={{ rotate: -8, scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300, damping: 18 }}
+                src="/icons/logo.svg"
+                className="relative h-7 sm:h-8"
+                alt="logo"
+              />
+            </span>
+            <span className="self-center text-lg font-extrabold tracking-tight whitespace-nowrap sm:text-xl">
+              <span className="text-slate-900">Resume</span>
+              <span className="bg-gradient-to-r from-primary-600 to-sky-500 bg-clip-text text-transparent">
+                AI
+              </span>
             </span>
           </Link>
-          <div className="flex items-center gap-1 lg:order-2 sm:gap-2">
+
+          <div className="flex items-center gap-1 sm:gap-2 lg:order-2">
             {isLoaded && !isSignedIn ? (
               <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
                 <Link
                   href="/sign-in"
-                  className="inline-block text-gray-800 hover:bg-primary-700/10 duration-300 focus:ring-4 focus:ring-primary-700/30 font-medium rounded-full text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-1 focus:outline-none"
+                  className="inline-block rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition-colors duration-200 hover:bg-slate-900/5 hover:text-slate-900 focus:outline-none focus:ring-4 focus:ring-primary-700/20 lg:px-5 lg:py-2.5"
                 >
                   Log in
                 </Link>
               </motion.div>
             ) : (
-              <div className="mr-2 h-full items-center align-middle flex justify-center sm:mr-4">
+              <div className="mr-2 flex h-full items-center justify-center align-middle sm:mr-4">
                 <UserMenu />
               </div>
             )}
@@ -54,7 +64,7 @@ const Header = () => {
               <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
                 <Link
                   href={`${!isSignedIn ? "/sign-up" : "/dashboard"}`}
-                  className="inline-block text-white bg-primary-700 hover:bg-primary-800 shadow-md shadow-primary-700/20 hover:shadow-lg hover:shadow-primary-700/30 transition-shadow focus:ring-4 focus:ring-primary-300 font-medium rounded-full text-sm px-4 lg:px-5 py-2 lg:py-2.5 focus:outline-none"
+                  className="inline-block rounded-full bg-gradient-to-r from-primary-700 to-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-primary-700/25 transition-shadow duration-300 hover:shadow-lg hover:shadow-primary-700/40 focus:outline-none focus:ring-4 focus:ring-primary-300 lg:px-5 lg:py-2.5"
                 >
                   {!isSignedIn ? "Get started" : "Dashboard"}
                 </Link>
