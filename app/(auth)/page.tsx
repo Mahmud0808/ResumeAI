@@ -28,7 +28,7 @@ const featureCards = [
     step: "01",
     title: "Create Your Template",
     description:
-      "Start by selecting the color scheme for your resume template. Our single, professionally designed template ensures a clean and consistent look for all users.",
+      "Start by choosing from a variety of professionally designed templates — Classic, Modern, Sidebar, and more. Pick a preset theme color or set your own with the custom color picker.",
   },
   {
     icon: Edit,

@@ -25,9 +25,11 @@
 
 - **AI-Powered Resume Generation:** Generate a professional resume using AI.
 
+- **Multiple Templates:** Choose from a growing collection of professionally designed templates (Classic, Modern, Elegant, Minimal, Sidebar, and more) with preset theme colors or a custom color picker.
+
 - **User Authentication:** Secure login and registration with NextAuth (Google OAuth + email/password), with brute-force rate limiting.
 
-- **Real-Time Preview:** See live updates as you fill out the resume form.
+- **Real-Time Preview:** See live updates as you fill out the resume form, plus per-resume template thumbnails on the dashboard.
 
 - **Easy Customization:** Edit sections like experience, education, skills, and more.
 
