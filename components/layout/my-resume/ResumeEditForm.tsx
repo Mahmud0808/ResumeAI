@@ -11,10 +11,6 @@ import ExperienceForm from "./forms/ExperienceForm";
 import EducationForm from "./forms/EducationForm";
 import SkillsForm from "./forms/SkillsForm";
 import CustomSectionsForm from "./forms/CustomSectionsForm";
-import ThemeColor from "@/components/layout/ThemeColor";
-import TemplatePicker from "@/components/layout/TemplatePicker";
-import DateFormatPicker from "@/components/layout/DateFormatPicker";
-import SectionVisibility from "@/components/layout/SectionVisibility";
 import { useToast } from "@/components/ui/use-toast";
 import { useFormContext } from "@/lib/context/FormProvider";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
@@ -58,14 +54,8 @@ const ResumeEditForm = ({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="sticky top-0 z-10 -mx-1 flex flex-wrap justify-between gap-2 rounded-xl border border-slate-200/60 bg-white/70 px-3 py-2 shadow-sm backdrop-blur-xl">
-        <div className="flex flex-wrap gap-2">
-          <ThemeColor params={params} />
-          <TemplatePicker params={params} />
-          <DateFormatPicker params={params} />
-          <SectionVisibility params={params} />
-        </div>
-        <div className="flex gap-2">
+      <div className="sticky top-0 z-10 -mx-1 flex justify-between gap-2 rounded-xl border border-slate-200/60 bg-white/70 px-3 py-2 shadow-sm backdrop-blur-xl">
+        <div>
           {activeFormIndex > 1 && (
             <Button
               className="flex gap-2 bg-primary-700 hover:bg-primary-800 text-white"
@@ -75,6 +65,8 @@ const ResumeEditForm = ({
               <ArrowLeft /> Prev
             </Button>
           )}
+        </div>
+        <div className="flex gap-2">
           <Button
             className="flex gap-2 bg-primary-700 hover:bg-primary-800 text-white"
             size="sm"

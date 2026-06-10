@@ -262,3 +262,26 @@
     transform: rotate(360deg);
   }
 }
+
+/* AI "thinking" shimmer label */
+.ai-thinking-text {
+  background: linear-gradient(
+    90deg,
+    #1d4ed8 0%,
+    #38bdf8 25%,
+    #a855f7 50%,
+    #38bdf8 75%,
+    #1d4ed8 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: ai-shimmer 1.6s linear infinite;
+}
+
+@keyframes ai-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}

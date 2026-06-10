@@ -9,6 +9,7 @@ import { addExperienceToResume } from "@/lib/actions/resume.actions";
 import { useFormContext } from "@/lib/context/FormProvider";
 import { Brain, Loader2, Minus, Plus } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { AiLoader, AiThinkingText } from "@/components/common/AiLoader";
 import React, { useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -232,11 +233,16 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
                               disabled={isAiLoading}
                             >
                               {isAiLoading && currentAiIndex === index ? (
-                                <Loader2 size={16} className="animate-spin" />
+                                <>
+                                  <AiLoader size={16} />
+                                  <AiThinkingText />
+                                </>
                               ) : (
-                                <Brain className="h-4 w-4" />
-                              )}{" "}
-                              Generate from AI
+                                <>
+                                  <Brain className="h-4 w-4" /> Generate from
+                                  AI
+                                </>
+                              )}
                             </Button>
                           </div>
                         ) : (

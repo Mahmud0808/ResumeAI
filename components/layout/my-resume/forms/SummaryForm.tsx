@@ -8,6 +8,7 @@ import { updateResume } from "@/lib/actions/resume.actions";
 import { useFormContext } from "@/lib/context/FormProvider";
 import { Brain, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { AiLoader, AiThinkingText } from "@/components/common/AiLoader";
 import React, { useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -133,11 +134,15 @@ const SummaryForm = ({ params }: { params: { id: string } }) => {
                       disabled={isAiLoading}
                     >
                       {isAiLoading ? (
-                        <Loader2 size={16} className="animate-spin" />
+                        <>
+                          <AiLoader size={16} />
+                          <AiThinkingText />
+                        </>
                       ) : (
-                        <Brain className="h-4 w-4" />
-                      )}{" "}
-                      Generate from AI
+                        <>
+                          <Brain className="h-4 w-4" /> Generate from AI
+                        </>
+                      )}
                     </Button>
                   </div>
                   <FormControl>

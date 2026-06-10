@@ -51,7 +51,7 @@ const DateFormatPicker = ({ params }: { params: { id: string } }) => {
         <Button
           size="sm"
           variant="outline"
-          className="flex gap-2 border-primary-700 text-primary-700 hover:bg-primary-700/10"
+          className="flex gap-2 border-primary-700 text-primary-700 hover:border-primary-700 hover:bg-primary-50 hover:text-primary-800 hover:shadow-md hover:shadow-primary-700/15"
         >
           <CalendarDays /> Dates
         </Button>

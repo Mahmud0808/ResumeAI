@@ -108,7 +108,7 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
           <div id="no-print">
             <Header />
             <FadeIn className="my-8 mx-6 sm:mx-10 md:my-10 md:mx-20 lg:mx-36">
-              {isOwnerView ? (
+              {isOwnerView && (
                 <>
                   <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
                     Congrats! Your ultimate AI-generated resume is ready!
@@ -116,16 +116,6 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
                   <p className="mt-1 text-center text-sm text-gray-600 md:text-base">
                     You can now download your resume or share its unique URL
                     with your friends and family.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
-                    Resume Preview
-                  </h2>
-                  <p className="mt-1 text-center text-sm text-gray-600 md:text-base">
-                    You are currently viewing a preview of someone else's
-                    resume.
                   </p>
                 </>
               )}
