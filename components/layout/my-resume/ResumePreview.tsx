@@ -9,6 +9,9 @@ import ModernTemplate from "./templates/ModernTemplate";
 import ElegantTemplate from "./templates/ElegantTemplate";
 import MinimalTemplate from "./templates/MinimalTemplate";
 import SidebarTemplate from "./templates/SidebarTemplate";
+import ExecutiveTemplate from "./templates/ExecutiveTemplate";
+import CompactTemplate from "./templates/CompactTemplate";
+import BoldTemplate from "./templates/BoldTemplate";
 
 const TEMPLATES: Record<string, React.ComponentType<any>> = {
   classic: ClassicTemplate,
@@ -16,6 +19,9 @@ const TEMPLATES: Record<string, React.ComponentType<any>> = {
   elegant: ElegantTemplate,
   minimal: MinimalTemplate,
   sidebar: SidebarTemplate,
+  executive: ExecutiveTemplate,
+  compact: CompactTemplate,
+  bold: BoldTemplate,
 };
 
 const ResumePreview = () => {

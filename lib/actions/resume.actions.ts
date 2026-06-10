@@ -140,7 +140,9 @@ export async function fetchUserResumes() {
 
     await connectToDB();
 
-    const resumes = await Resume.find({ userId: userId });
+    // Newest first: _id encodes creation time, so this is stable creation
+    // order (unlike updatedAt, which would reshuffle cards on every edit).
+    const resumes = await Resume.find({ userId: userId }).sort({ _id: -1 });
 
     return JSON.stringify(resumes);
   } catch (error: any) {

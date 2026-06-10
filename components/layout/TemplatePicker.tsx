@@ -11,6 +11,7 @@ import { Check, LayoutTemplate } from "lucide-react";
 import { resumeTemplates, themeColors } from "@/lib/utils";
 import { updateResume } from "@/lib/actions/resume.actions";
 import { useToast } from "@/components/ui/use-toast";
+import TemplateGlyph from "@/components/layout/TemplateGlyph";
 
 const TemplatePicker = ({ params }: { params: { id: string } }) => {
   const { toast } = useToast();
@@ -53,28 +54,31 @@ const TemplatePicker = ({ params }: { params: { id: string } }) => {
           <LayoutTemplate /> Template
         </Button>
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent className="w-72">
         <h2 className="mb-3 text-sm font-bold">Select Template</h2>
-        <div className="flex flex-col gap-2">
+        <div className="grid max-h-80 grid-cols-2 gap-2 overflow-y-auto pr-1">
           {resumeTemplates.map((template) => (
             <button
               key={template.id}
               onClick={() => onSelect(template.id)}
-              className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition-all duration-200 hover:bg-slate-50 hover:shadow-sm active:scale-[0.98] ${
+              className={`group relative flex flex-col items-center gap-1.5 rounded-xl border p-2 text-sm transition-all duration-200 hover:bg-slate-50 hover:shadow-md active:scale-[0.97] ${
                 selected === template.id
-                  ? "border-primary-700 bg-primary-50/50 shadow-sm"
+                  ? "border-primary-700 bg-primary-50/50 shadow-sm ring-1 ring-primary-700/30"
                   : "border-slate-200"
               }`}
             >
-              <span className="flex items-center gap-2">
-                <span
-                  className="inline-block h-4 w-4 rounded-sm"
-                  style={{ backgroundColor: themeColor }}
-                />
+              <TemplateGlyph
+                template={template.id}
+                color={themeColor}
+                className="w-full transition-transform duration-200 group-hover:scale-[1.03]"
+              />
+              <span className="text-xs font-medium text-slate-700">
                 {template.name}
               </span>
               {selected === template.id && (
-                <Check className="h-4 w-4 text-primary-700" strokeWidth={3} />
+                <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary-700 shadow-sm">
+                  <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                </span>
               )}
             </button>
           ))}

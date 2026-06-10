@@ -27,6 +27,7 @@ import { deleteResume } from "@/lib/actions/resume.actions";
 import { useToast } from "../ui/use-toast";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import MiniResumePreview from "./MiniResumePreview";
 
 const ResumeCard = ({
   resume,
@@ -90,19 +91,9 @@ const ResumeCard = ({
         href={"/resume/" + myResume.resumeId}
         className="flex-grow"
       >
-        <div
-          className="bg-gradient-to-b from-pink-100 via-purple-200 to-blue-200 rounded-t-xl border-t-4 h-full"
-          style={{
-            borderColor: myResume?.themeColor,
-          }}
-        >
-          <div className="flex size-full items-center justify-center">
-            <img
-              src="/img/blank-cv.png"
-              width={80}
-              height={80}
-              className="transition-transform duration-300 group-hover:scale-105"
-            />
+        <div className="h-full overflow-hidden rounded-t-xl border border-b-0 border-slate-200/80 bg-white">
+          <div className="h-full transition-transform duration-300 group-hover:scale-[1.03]">
+            <MiniResumePreview resume={myResume} />
           </div>
         </div>
       </Link>

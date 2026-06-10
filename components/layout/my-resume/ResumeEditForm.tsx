@@ -14,7 +14,14 @@ import ThemeColor from "@/components/layout/ThemeColor";
 import TemplatePicker from "@/components/layout/TemplatePicker";
 import { useToast } from "@/components/ui/use-toast";
 import { useFormContext } from "@/lib/context/FormProvider";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
+
+// Slides forward on Next, backward on Prev (direction: 1 or -1).
+const stepVariants: Variants = {
+  enter: (direction: number) => ({ opacity: 0, x: 24 * direction }),
+  center: { opacity: 1, x: 0 },
+  exit: (direction: number) => ({ opacity: 0, x: -24 * direction }),
+};
 import {
   addEducationToResume,
   addExperienceToResume,
@@ -37,6 +44,13 @@ const ResumeEditForm = ({
   const { toast } = useToast();
   const { formData, activeFormIndex, setActiveFormIndex } = useFormContext();
   const [isLoading, setIsLoading] = React.useState(false);
+
+  // Animation-only: remembers the previous step to derive slide direction.
+  const prevIndexRef = React.useRef(activeFormIndex);
+  const direction = activeFormIndex >= prevIndexRef.current ? 1 : -1;
+  React.useEffect(() => {
+    prevIndexRef.current = activeFormIndex;
+  }, [activeFormIndex]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -153,12 +167,14 @@ const ResumeEditForm = ({
       {activeFormIndex === 6 ? (
         redirect("/resume/" + params.id)
       ) : (
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={activeFormIndex}
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -24 }}
+            custom={direction}
+            variants={stepVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
             {activeFormIndex === 1 ? (

@@ -29,6 +29,9 @@ export const resumeTemplates = [
   { id: "elegant", name: "Elegant" },
   { id: "minimal", name: "Minimal" },
   { id: "sidebar", name: "Sidebar" },
+  { id: "executive", name: "Executive" },
+  { id: "compact", name: "Compact" },
+  { id: "bold", name: "Bold" },
 ] as const;
 
 export type ResumeTemplateId = (typeof resumeTemplates)[number]["id"];
