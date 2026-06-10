@@ -1,5 +1,5 @@
 import { useFormContext } from "@/lib/context/FormProvider";
-import { sanitizeNbsp, themeColors } from "@/lib/utils";
+import { formatResumeDate, sanitizeNbsp, themeColors } from "@/lib/utils";
 import React from "react";
 
 const ExperiencePreview = () => {
@@ -38,13 +38,13 @@ const ExperiencePreview = () => {
             {experience?.city && experience?.state && ", "}
             {experience?.state}
             <span>
-              {experience?.startDate}
+              {formatResumeDate(experience?.startDate, formData?.dateFormat)}
               {experience?.startDate &&
                 (experience?.endDate || experience?.endDate === "") &&
                 " to "}
               {experience?.startDate && experience?.endDate == ""
                 ? "Present"
-                : experience.endDate}
+                : formatResumeDate(experience?.endDate, formData?.dateFormat)}
             </span>
           </h2>
           {experience?.workSummary && (

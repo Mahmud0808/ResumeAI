@@ -6,10 +6,10 @@ import { useFormContext } from "@/lib/context/FormProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Rating } from "@smastrom/react-rating";
-import { Loader2, Minus, Plus } from "lucide-react";
+import { BarChart3, List, Loader2, Minus, Plus } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import "@smastrom/react-rating/style.css";
-import { addSkillToResume } from "@/lib/actions/resume.actions";
+import { addSkillToResume, updateResume } from "@/lib/actions/resume.actions";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -20,13 +20,44 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { SkillValidationSchema } from "@/lib/validations/resume";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
 const SkillsForm = ({ params }: { params: { id: string } }) => {
   const { formData, handleInputChange } = useFormContext();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const skillsStyle = formData?.skillsStyle === "list" ? "list" : "bars";
+
+  const onStyleChange = async (style: "bars" | "list") => {
+    if (style === skillsStyle) {
+      return;
+    }
+
+    handleInputChange({
+      target: { name: "skillsStyle", value: style },
+    });
+
+    const result = await updateResume({
+      resumeId: params.id,
+      updates: { skillsStyle: style },
+    });
+
+    if (result.success) {
+      toast({
+        title: "Information saved.",
+        description: "Skills display style updated automatically.",
+        className: "bg-white",
+      });
+    } else {
+      toast({
+        title: "Uh Oh! Something went wrong.",
+        description: result?.error,
+        variant: "destructive",
+        className: "bg-white",
+      });
+    }
+  };
 
   const form = useForm<z.infer<typeof SkillValidationSchema>>({
     resolver: zodResolver(SkillValidationSchema),
@@ -39,6 +70,7 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
               {
                 name: "",
                 rating: 1,
+                category: "",
               },
             ],
     },
@@ -49,9 +81,18 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
     name: "skills",
   });
 
+  // Validate on mount so the Save button reflects actual validity instead
+  // of staying disabled until the first keystroke.
+  useEffect(() => {
+    form.trigger();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleChange = (
     index: number,
-    event: React.ChangeEvent<HTMLInputElement>
+    event:
+      | React.ChangeEvent<HTMLInputElement>
+      | { target: { name: string; value: string } }
   ) => {
     const { name, value } = event.target;
     const newEntries = form.getValues("skills").slice();
@@ -114,6 +155,39 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
         Add your top professional key skills
       </p>
 
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <span className="text-sm font-semibold text-slate-700">
+          Display style:
+        </span>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => onStyleChange("bars")}
+            className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all duration-200 active:scale-[0.97] ${
+              skillsStyle === "bars"
+                ? "border-primary-700 bg-primary-50/60 text-primary-700 shadow-sm"
+                : "border-slate-200 text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            <BarChart3 className="h-3.5 w-3.5" /> Rating bars
+          </button>
+          <button
+            type="button"
+            onClick={() => onStyleChange("list")}
+            className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all duration-200 active:scale-[0.97] ${
+              skillsStyle === "list"
+                ? "border-primary-700 bg-primary-50/60 text-primary-700 shadow-sm"
+                : "border-slate-200 text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            <List className="h-3.5 w-3.5" /> Plain list
+            <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">
+              ATS
+            </span>
+          </button>
+        </div>
+      </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSave)} className="mt-5">
           <AnimatePresence initial={false}>
@@ -157,22 +231,57 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name={`skills.${index}.rating`}
-                render={({ field }) => (
-                  <Rating
-                    style={{ maxWidth: 160, height: 46 }}
-                    value={field.value || 1}
-                    onChange={(value: number) => {
-                      field.onChange(value);
-                      handleRatingChange(index, value);
-                    }}
-                    orientation="horizontal"
-                    isRequired
-                  />
-                )}
-              />
+              {skillsStyle === "list" ? (
+                <FormField
+                  control={form.control}
+                  name={`skills.${index}.category`}
+                  render={({ field }) => (
+                    <FormItem className="space-y-2 w-full">
+                      <FormLabel className="flex items-baseline gap-1.5 text-slate-700 font-semibold text-md">
+                        Group:
+                        <span className="text-xs font-normal text-slate-400">
+                          optional
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Backend, Frontend, Tools"
+                          className="no-focus"
+                          {...field}
+                          value={(field.value as string) || ""}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            handleChange(index, {
+                              target: {
+                                name: "category",
+                                value: e.target.value,
+                              },
+                            });
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <FormField
+                  control={form.control}
+                  name={`skills.${index}.rating`}
+                  render={({ field }) => (
+                    <Rating
+                      style={{ maxWidth: 160, height: 46 }}
+                      value={field.value || 1}
+                      onChange={(value: number) => {
+                        field.onChange(value);
+                        handleRatingChange(index, value);
+                      }}
+                      orientation="horizontal"
+                      isRequired
+                    />
+                  )}
+                />
+              )}
             </motion.div>
           ))}
           </AnimatePresence>
@@ -180,7 +289,7 @@ const SkillsForm = ({ params }: { params: { id: string } }) => {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => append({ name: "", rating: 1 })}
+                onClick={() => append({ name: "", rating: 1, category: "" })}
                 className="text-primary"
                 type="button"
               >

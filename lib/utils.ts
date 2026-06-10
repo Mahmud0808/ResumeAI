@@ -40,6 +40,115 @@ export const stripHtml = (html: string): string => {
   return html.replace(/<[^>]*>/g, "").trim();
 };
 
+export const resumeDateFormats = [
+  { id: "default", name: "As typed", example: "2023-07-05" },
+  // Month + year (most common on resumes)
+  { id: "mmm-yyyy", name: "Short month", example: "Jul 2023" },
+  { id: "mmmm-yyyy", name: "Full month", example: "July 2023" },
+  { id: "mm-yyyy", name: "Numeric month", example: "07/2023" },
+  { id: "mm-dot-yyyy", name: "Numeric month, dots", example: "07.2023" },
+  { id: "yyyy", name: "Year only", example: "2023" },
+  // Full dates, day first (UK / Europe / most of the world)
+  { id: "dd-mmm-yyyy", name: "Day, short month", example: "05 Jul 2023" },
+  { id: "dd-mmmm-yyyy", name: "Day, full month", example: "05 July 2023" },
+  { id: "dd-mm-yyyy", name: "Day first", example: "05/07/2023" },
+  { id: "dd-dot-mm-yyyy", name: "Day first, dots", example: "05.07.2023" },
+  // Full dates, month first (US)
+  { id: "mmm-dd-yyyy", name: "US short month", example: "Jul 5, 2023" },
+  { id: "mmmm-dd-yyyy", name: "US full month", example: "July 5, 2023" },
+  { id: "mm-dd-yyyy", name: "US numeric", example: "07/05/2023" },
+  // Year first (ISO / East Asia)
+  { id: "yyyy-mm-dd", name: "ISO", example: "2023-07-05" },
+  { id: "yyyy-slash-mm-dd", name: "Year first, slashes", example: "2023/07/05" },
+] as const;
+
+export type ResumeDateFormatId = (typeof resumeDateFormats)[number]["id"];
+
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+/**
+ * Formats an ISO date string (YYYY-MM-DD, as produced by date inputs) per the
+ * resume's date format setting. Unparseable values pass through untouched so
+ * legacy free-text dates keep rendering.
+ */
+export const formatResumeDate = (
+  value: string | undefined | null,
+  format: string | undefined | null
+): string => {
+  if (!value) {
+    return "";
+  }
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value.trim());
+  if (!match || !format || format === "default") {
+    return value;
+  }
+
+  const [, year, month, day] = match;
+  const monthIndex = Number(month) - 1;
+  if (monthIndex < 0 || monthIndex > 11) {
+    return value;
+  }
+  const monthName = MONTH_NAMES[monthIndex];
+
+  const shortMonth = monthName.slice(0, 3);
+  const dayNum = Number(day);
+
+  switch (format) {
+    case "mmm-yyyy":
+      return `${shortMonth} ${year}`;
+    case "mmmm-yyyy":
+      return `${monthName} ${year}`;
+    case "mm-yyyy":
+      return `${month}/${year}`;
+    case "mm-dot-yyyy":
+      return `${month}.${year}`;
+    case "yyyy":
+      return year;
+    case "dd-mmm-yyyy":
+      return `${day} ${shortMonth} ${year}`;
+    case "dd-mmmm-yyyy":
+      return `${day} ${monthName} ${year}`;
+    case "dd-mm-yyyy":
+      return `${day}/${month}/${year}`;
+    case "dd-dot-mm-yyyy":
+      return `${day}.${month}.${year}`;
+    case "mmm-dd-yyyy":
+      return `${shortMonth} ${dayNum}, ${year}`;
+    case "mmmm-dd-yyyy":
+      return `${monthName} ${dayNum}, ${year}`;
+    case "mm-dd-yyyy":
+      return `${month}/${day}/${year}`;
+    case "yyyy-mm-dd":
+      return `${year}-${month}-${day}`;
+    case "yyyy-slash-mm-dd":
+      return `${year}/${month}/${day}`;
+    default:
+      return value;
+  }
+};
+
+// Built-in sections the user can hide from the resume (data is kept).
+export const hideableSections = [
+  { id: "summary", name: "Summary" },
+  { id: "experience", name: "Professional Experience" },
+  { id: "education", name: "Education" },
+  { id: "skills", name: "Skills" },
+] as const;
+
 /**
  * Replaces non-breaking spaces (Quill emits them for consecutive spaces)
  * with regular spaces. Keeps resume text ATS-parseable and lets the

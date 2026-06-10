@@ -185,6 +185,10 @@ export async function updateResume({
     themeColor: string;
     template: string;
     sectionOrder: string[];
+    skillsStyle: string;
+    dateFormat: string;
+    hiddenSections: string[];
+    customSections: { title: string; body: string }[];
     isPublic: boolean;
   }>;
 }) {

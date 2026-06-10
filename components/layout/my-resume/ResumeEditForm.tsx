@@ -10,8 +10,11 @@ import SummaryForm from "./forms/SummaryForm";
 import ExperienceForm from "./forms/ExperienceForm";
 import EducationForm from "./forms/EducationForm";
 import SkillsForm from "./forms/SkillsForm";
+import CustomSectionsForm from "./forms/CustomSectionsForm";
 import ThemeColor from "@/components/layout/ThemeColor";
 import TemplatePicker from "@/components/layout/TemplatePicker";
+import DateFormatPicker from "@/components/layout/DateFormatPicker";
+import SectionVisibility from "@/components/layout/SectionVisibility";
 import { useToast } from "@/components/ui/use-toast";
 import { useFormContext } from "@/lib/context/FormProvider";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
@@ -55,10 +58,12 @@ const ResumeEditForm = ({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="sticky top-0 z-10 -mx-1 flex justify-between gap-2 rounded-xl border border-slate-200/60 bg-white/70 px-3 py-2 shadow-sm backdrop-blur-xl">
-        <div className="flex gap-2">
+      <div className="sticky top-0 z-10 -mx-1 flex flex-wrap justify-between gap-2 rounded-xl border border-slate-200/60 bg-white/70 px-3 py-2 shadow-sm backdrop-blur-xl">
+        <div className="flex flex-wrap gap-2">
           <ThemeColor params={params} />
           <TemplatePicker params={params} />
+          <DateFormatPicker params={params} />
+          <SectionVisibility params={params} />
         </div>
         <div className="flex gap-2">
           {activeFormIndex > 1 && (
@@ -75,7 +80,7 @@ const ResumeEditForm = ({
             size="sm"
             disabled={isLoading}
             onClick={async () => {
-              if (activeFormIndex !== 5) {
+              if (activeFormIndex !== 6) {
                 setActiveFormIndex(activeFormIndex + 1);
               } else {
                 setIsLoading(true);
@@ -103,6 +108,12 @@ const ResumeEditForm = ({
                     phone: updates.phone,
                     email: updates.email,
                     summary: updates.summary,
+                    customSections: (formData?.customSections ?? []).map(
+                      (section: any) => ({
+                        title: section?.title || "",
+                        body: sanitizeNbsp(section?.body || ""),
+                      })
+                    ),
                   },
                 });
 
@@ -149,7 +160,7 @@ const ResumeEditForm = ({
               }
             }}
           >
-            {activeFormIndex === 5 ? (
+            {activeFormIndex === 6 ? (
               <>
                 {isLoading ? (
                   <>
@@ -169,7 +180,7 @@ const ResumeEditForm = ({
           </Button>
         </div>
       </div>
-      {activeFormIndex === 6 ? (
+      {activeFormIndex === 7 ? (
         redirect("/resume/" + params.id)
       ) : (
         <AnimatePresence mode="wait" custom={direction}>
@@ -192,6 +203,8 @@ const ResumeEditForm = ({
               <EducationForm params={params} />
             ) : activeFormIndex === 5 ? (
               <SkillsForm params={params} />
+            ) : activeFormIndex === 6 ? (
+              <CustomSectionsForm params={params} />
             ) : null}
           </motion.div>
         </AnimatePresence>

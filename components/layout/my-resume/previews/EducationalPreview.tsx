@@ -1,5 +1,5 @@
 import { useFormContext } from "@/lib/context/FormProvider";
-import { themeColors } from "@/lib/utils";
+import { formatResumeDate, themeColors } from "@/lib/utils";
 import React from "react";
 
 const EducationalPreview = () => {
@@ -36,13 +36,13 @@ const EducationalPreview = () => {
             {education?.degree && education?.major && " in "}
             {education?.major}
             <span>
-              {education?.startDate}
+              {formatResumeDate(education?.startDate, formData?.dateFormat)}
               {education?.startDate &&
                 (education?.endDate || education?.endDate === "") &&
                 " to "}
               {education?.startDate && education?.endDate == ""
                 ? "Present"
-                : education.endDate}
+                : formatResumeDate(education?.endDate, formData?.dateFormat)}
             </span>
           </h2>
           {education?.description && (

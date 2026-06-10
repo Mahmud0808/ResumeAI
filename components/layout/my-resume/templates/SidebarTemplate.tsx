@@ -35,36 +35,74 @@ const SidebarTemplate = ({
         </div>
       </EditableSection>
 
-      {formData?.skills?.length > 0 && (
+      {formData?.skills?.length > 0 &&
+        !formData?.hiddenSections?.includes("skills") && (
         <EditableSection index={5} isEditMode={isEditMode} onSelect={onSelect}>
           <h2 className="mb-2 mt-6 text-sm font-bold uppercase tracking-wide">
             Skill{formData.skills.length > 1 ? "s" : ""}
           </h2>
-          <div className="space-y-2">
-            {formData.skills.map((skill: any, index: number) => (
-              <div key={index}>
-                <p className="mb-1 text-xs">{skill?.name}</p>
-                <div className="h-1.5 w-full rounded-full bg-white/30">
-                  <div
-                    className="h-1.5 rounded-full bg-white"
-                    style={{ width: (skill?.rating || 1) * 20 + "%" }}
-                  />
+          {formData?.skillsStyle === "list" ? (
+            (() => {
+              const groups = new Map<string, string[]>();
+              const ungrouped: string[] = [];
+              for (const skill of formData.skills) {
+                if (!skill?.name) continue;
+                const group =
+                  typeof skill?.category === "string"
+                    ? skill.category.trim()
+                    : "";
+                if (group) {
+                  groups.set(group, [...(groups.get(group) ?? []), skill.name]);
+                } else {
+                  ungrouped.push(skill.name);
+                }
+              }
+              return (
+                <div className="space-y-1.5">
+                  {[...groups.entries()].map(([group, names]) => (
+                    <p key={group} className="break-words text-xs leading-relaxed">
+                      <span className="font-bold">{group}:</span>{" "}
+                      {names.join(", ")}
+                    </p>
+                  ))}
+                  {ungrouped.length > 0 && (
+                    <p className="break-words text-xs leading-relaxed">
+                      {groups.size > 0 && (
+                        <span className="font-bold">Other: </span>
+                      )}
+                      {ungrouped.join(", ")}
+                    </p>
+                  )}
                 </div>
-              </div>
-            ))}
-          </div>
+              );
+            })()
+          ) : (
+            <div className="space-y-2">
+              {formData.skills.map((skill: any, index: number) => (
+                <div key={index}>
+                  <p className="mb-1 text-xs">{skill?.name}</p>
+                  <div className="h-1.5 w-full rounded-full bg-white/30">
+                    <div
+                      className="h-1.5 rounded-full bg-white"
+                      style={{ width: (skill?.rating || 1) * 20 + "%" }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </EditableSection>
       )}
     </div>
 
-    {/* Main column: summary + reorderable experience/education (skills stay
-        pinned in the sidebar) */}
+    {/* Main column: summary + reorderable experience/education/custom
+        sections (skills stay pinned in the sidebar) */}
     <div className="w-[66%] p-8">
       <BodySections
         formData={formData}
         isEditMode={isEditMode}
         onSelect={onSelect}
-        sections={["experience", "education"]}
+        sections={["experience", "education", "custom"]}
       />
     </div>
   </div>

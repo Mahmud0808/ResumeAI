@@ -153,11 +153,36 @@ export const EducationValidationSchema = z.object({
   ),
 });
 
+export const CustomSectionValidationSchema = z.object({
+  sections: z.array(
+    z.object({
+      title: z
+        .string()
+        .trim()
+        .min(2, { message: "Title must be at least 2 characters long" })
+        .max(100, { message: "Title must not exceed 100 characters" }),
+      body: z
+        .string()
+        .trim()
+        .min(5, { message: "Body must be at least 5 characters long" })
+        .max(3000, { message: "Body must not exceed 3000 characters" })
+        .refine((value) => stripHtml(value).length > 0, {
+          message: "Body cannot be empty or just whitespace",
+        }),
+    })
+  ),
+});
+
 export const SkillValidationSchema = z.object({
   skills: z.array(
     z.object({
       name,
       rating,
+      category: z
+        .string()
+        .trim()
+        .max(50, { message: "Group must not exceed 50 characters" })
+        .optional(),
     })
   ),
 });

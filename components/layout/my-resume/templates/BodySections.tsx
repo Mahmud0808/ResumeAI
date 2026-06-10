@@ -6,18 +6,21 @@ import SummaryPreview from "../previews/SummaryPreview";
 import ExperiencePreview from "../previews/ExperiencePreview";
 import EducationalPreview from "../previews/EducationalPreview";
 import SkillsPreview from "../previews/SkillsPreview";
+import CustomSectionPreview from "../previews/CustomSectionPreview";
 import { useFormContext } from "@/lib/context/FormProvider";
 import { updateResume } from "@/lib/actions/resume.actions";
 import { useToast } from "@/components/ui/use-toast";
 import { Reorder, useDragControls } from "framer-motion";
 import { GripVertical } from "lucide-react";
 
-const DEFAULT_ORDER = ["experience", "education", "skills"] as const;
+const BUILTIN_ORDER = ["experience", "education", "skills"] as const;
+const CUSTOM_PREFIX = "custom-";
+const CUSTOM_FORM_INDEX = 6;
 
-type SectionKey = (typeof DEFAULT_ORDER)[number];
+type BuiltinKey = (typeof BUILTIN_ORDER)[number];
 
-const SECTION_CONFIG: Record<
-  SectionKey,
+const BUILTIN_CONFIG: Record<
+  BuiltinKey,
   {
     index: number;
     hasData: (formData: any) => boolean;
@@ -41,18 +44,23 @@ const SECTION_CONFIG: Record<
   },
 };
 
+const customIndexOf = (key: string) => Number(key.slice(CUSTOM_PREFIX.length));
+
 /** A draggable section row: grip handle starts the drag, body stays clickable. */
 const DraggableSection = ({
   sectionKey,
   isEditMode,
   onSelect,
+  children,
+  stepIndex,
 }: {
-  sectionKey: SectionKey;
+  sectionKey: string;
   isEditMode: boolean;
   onSelect: (index: number) => void;
+  children: React.ReactNode;
+  stepIndex: number;
 }) => {
   const dragControls = useDragControls();
-  const { index, Component } = SECTION_CONFIG[sectionKey];
 
   return (
     <Reorder.Item
@@ -73,24 +81,29 @@ const DraggableSection = ({
       >
         <GripVertical className="h-4 w-4" />
       </div>
-      <EditableSection index={index} isEditMode={isEditMode} onSelect={onSelect}>
-        <Component />
+      <EditableSection
+        index={stepIndex}
+        isEditMode={isEditMode}
+        onSelect={onSelect}
+      >
+        {children}
       </EditableSection>
     </Reorder.Item>
   );
 };
 
 /**
- * The summary/experience/education/skills blocks, shared across templates.
- * Summary is pinned first; the remaining sections are drag-reorderable in
- * edit mode and render in the saved order everywhere. `sections` lets a
- * template manage a subset (e.g. sidebar keeps skills in its side column).
+ * The body blocks shared across templates. Summary is pinned first (hideable);
+ * built-in and custom sections are drag-reorderable in edit mode and render in
+ * the saved order everywhere. `sections` lets a template manage a subset —
+ * built-in keys plus the "custom" token for all custom sections (e.g. sidebar
+ * keeps skills in its side column).
  */
 const BodySections = ({
   formData,
   isEditMode,
   onSelect,
-  sections = [...DEFAULT_ORDER],
+  sections,
 }: {
   formData: any;
   isEditMode: boolean;
@@ -105,22 +118,47 @@ const BodySections = ({
     return () => clearTimeout(persistTimer.current);
   }, []);
 
+  const customSections = Array.isArray(formData?.customSections)
+    ? formData.customSections
+    : [];
+  const customKeys = customSections.map(
+    (_: any, index: number) => `${CUSTOM_PREFIX}${index}`
+  );
+  const hidden: string[] = Array.isArray(formData?.hiddenSections)
+    ? formData.hiddenSections
+    : [];
+
   // Saved order, sanitized: unknown keys dropped, missing keys appended.
-  const fullOrder = useMemo<SectionKey[]>(() => {
+  const fullOrder = useMemo<string[]>(() => {
+    const known = [...BUILTIN_ORDER, ...customKeys] as string[];
     const saved = (
       Array.isArray(formData?.sectionOrder) ? formData.sectionOrder : []
-    ).filter((key: any): key is SectionKey =>
-      (DEFAULT_ORDER as readonly string[]).includes(key)
-    );
-    return [...saved, ...DEFAULT_ORDER.filter((key) => !saved.includes(key))];
-  }, [formData?.sectionOrder]);
+    ).filter((key: any) => known.includes(key));
+    return [...saved, ...known.filter((key) => !saved.includes(key))];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData?.sectionOrder, customKeys.length]);
+
+  const isCustom = (key: string) => key.startsWith(CUSTOM_PREFIX);
+
+  const inScope = (key: string) =>
+    !sections ||
+    sections.includes(key) ||
+    (sections.includes("custom") && isCustom(key));
+
+  const hasData = (key: string) => {
+    if (isCustom(key)) {
+      const section = customSections[customIndexOf(key)];
+      return !!(section?.title && section?.body);
+    }
+    return BUILTIN_CONFIG[key as BuiltinKey].hasData(formData);
+  };
 
   // Sections this instance shows, with data, in saved order.
   const visibleKeys = fullOrder.filter(
-    (key) => sections.includes(key) && SECTION_CONFIG[key].hasData(formData)
+    (key) => inScope(key) && !hidden.includes(key) && hasData(key)
   );
 
-  const onReorder = (newVisible: SectionKey[]) => {
+  const onReorder = (newVisible: string[]) => {
     // Splice the reordered visible keys back into the full order, leaving
     // hidden/foreign sections in their slots.
     let cursor = 0;
@@ -149,11 +187,25 @@ const BodySections = ({
     }, 800);
   };
 
+  const renderContent = (key: string) =>
+    isCustom(key) ? (
+      <CustomSectionPreview index={customIndexOf(key)} />
+    ) : (
+      React.createElement(BUILTIN_CONFIG[key as BuiltinKey].Component)
+    );
+
+  const stepIndexFor = (key: string) =>
+    isCustom(key) ? CUSTOM_FORM_INDEX : BUILTIN_CONFIG[key as BuiltinKey].index;
+
+  const showSummary = !hidden.includes("summary");
+
   return (
     <>
-      <EditableSection index={2} isEditMode={isEditMode} onSelect={onSelect}>
-        <SummaryPreview />
-      </EditableSection>
+      {showSummary && (
+        <EditableSection index={2} isEditMode={isEditMode} onSelect={onSelect}>
+          <SummaryPreview />
+        </EditableSection>
+      )}
 
       {isEditMode ? (
         <Reorder.Group
@@ -168,23 +220,23 @@ const BodySections = ({
               sectionKey={key}
               isEditMode={isEditMode}
               onSelect={onSelect}
-            />
+              stepIndex={stepIndexFor(key)}
+            >
+              {renderContent(key)}
+            </DraggableSection>
           ))}
         </Reorder.Group>
       ) : (
-        visibleKeys.map((key) => {
-          const { index, Component } = SECTION_CONFIG[key];
-          return (
-            <EditableSection
-              key={key}
-              index={index}
-              isEditMode={isEditMode}
-              onSelect={onSelect}
-            >
-              <Component />
-            </EditableSection>
-          );
-        })
+        visibleKeys.map((key) => (
+          <EditableSection
+            key={key}
+            index={stepIndexFor(key)}
+            isEditMode={isEditMode}
+            onSelect={onSelect}
+          >
+            {renderContent(key)}
+          </EditableSection>
+        ))
       )}
     </>
   );
