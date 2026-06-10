@@ -175,6 +175,7 @@ export async function updateResume({
 }: {
   resumeId: string;
   updates: Partial<{
+    title: string;
     firstName: string;
     lastName: string;
     jobTitle: string;

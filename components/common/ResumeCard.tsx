@@ -21,12 +21,33 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import { Loader2, MoreVertical } from "lucide-react";
 import { useRouter } from "next-nprogress-bar";
-import { deleteResume } from "@/lib/actions/resume.actions";
+import { deleteResume, updateResume } from "@/lib/actions/resume.actions";
 import { useToast } from "../ui/use-toast";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { ResumeNameValidationSchema } from "@/lib/validations/resume";
 import MiniResumePreview from "./MiniResumePreview";
 
 const ResumeCard = ({
@@ -51,8 +72,50 @@ const ResumeCard = ({
   const pathname = usePathname();
   const myResume = JSON.parse(resume);
   const [openAlert, setOpenAlert] = useState(false);
+  const [openRename, setOpenRename] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
   const { toast } = useToast();
+
+  const renameForm = useForm({
+    resolver: zodResolver(ResumeNameValidationSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: myResume.title,
+    },
+  });
+
+  const onRename = async (
+    values: z.infer<typeof ResumeNameValidationSchema>
+  ) => {
+    setIsRenaming(true);
+
+    const result = await updateResume({
+      resumeId: myResume.resumeId,
+      updates: { title: values.name },
+    });
+
+    setIsRenaming(false);
+
+    if (result.success) {
+      setOpenRename(false);
+
+      toast({
+        title: "Information saved.",
+        description: "Resume renamed successfully.",
+        className: "bg-white",
+      });
+
+      refreshResumes();
+    } else {
+      toast({
+        title: "Uh Oh! Something went wrong.",
+        description: result?.error,
+        variant: "destructive",
+        className: "bg-white",
+      });
+    }
+  };
 
   const onDelete = async () => {
     setIsLoading(true);
@@ -125,12 +188,95 @@ const ResumeCard = ({
               View
             </DropdownMenuItem>
 
+            <DropdownMenuItem
+              onClick={() => {
+                renameForm.reset({ name: myResume.title });
+                setOpenRename(true);
+              }}
+            >
+              Rename
+            </DropdownMenuItem>
+
             <DropdownMenuItem onClick={() => setOpenAlert(true)}>
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      <Dialog
+        open={openRename}
+        onOpenChange={(open) => {
+          if (!isRenaming) {
+            setOpenRename(open);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rename Resume</DialogTitle>
+            <DialogDescription>
+              Enter a new title for your resume. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...renameForm}>
+            <form
+              onSubmit={renameForm.handleSubmit(onRename)}
+              className="comment-form"
+            >
+              <FormField
+                control={renameForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      <p className="mt-2 mb-3 text-slate-700 font-semibold">
+                        Resume Title:
+                      </p>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        placeholder="Example: Android Developer Resume"
+                        className={`no-focus ${
+                          renameForm.formState.errors.name ? "error" : ""
+                        }`}
+                        autoComplete="off"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="mt-10 flex justify-end gap-5">
+                <button
+                  type="button"
+                  onClick={() => setOpenRename(false)}
+                  className="btn-ghost"
+                  disabled={isRenaming}
+                >
+                  Cancel
+                </button>
+                <Button
+                  type="submit"
+                  disabled={isRenaming || !renameForm.formState.isValid}
+                >
+                  {isRenaming ? (
+                    <>
+                      <Loader2 size={20} className="animate-spin" /> &nbsp;
+                      Saving
+                    </>
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={openAlert}>
         <AlertDialogContent>
