@@ -5,7 +5,6 @@ import {
   checkResumeOwnership,
   fetchResume,
 } from "@/lib/actions/resume.actions";
-import { currentUser } from "@clerk/nextjs/server";
 
 export async function generateMetadata({
   params,
@@ -31,8 +30,7 @@ export async function generateMetadata({
 }
 
 const MyResume = async ({ params }: { params: { id: string } }) => {
-  const user = await currentUser();
-  const isResumeOwner = await checkResumeOwnership(user?.id || "", params.id);
+  const isResumeOwner = await checkResumeOwnership(params.id);
 
   return <FinalResumeView params={params} isOwnerView={isResumeOwner} />;
 };

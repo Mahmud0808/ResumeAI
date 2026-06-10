@@ -5,11 +5,13 @@ import React from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useRouter } from "next-nprogress-bar";
-import { UserButton, useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
+import UserMenu from "@/components/common/UserMenu";
 
 const TopBar = () => {
   const router = useRouter();
-  const user = useUser();
+  const { data: session } = useSession();
+  const isSignedIn = !!session?.user;
 
   return (
     <div className="flex w-full justify-between items-center py-3 px-5 shadow-md">
@@ -20,7 +22,7 @@ const TopBar = () => {
         </p>
       </Link>
 
-      {user ? (
+      {isSignedIn ? (
         <div className="flex gap-3 items-center">
           <Button
             variant="outline"
@@ -30,7 +32,7 @@ const TopBar = () => {
           >
             Dashboard
           </Button>
-          <UserButton />
+          <UserMenu showName={false} />
         </div>
       ) : (
         <Button

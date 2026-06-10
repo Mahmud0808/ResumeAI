@@ -129,8 +129,19 @@ const EducationForm = ({ params }: { params: { id: string } }) => {
       `${education.universityName} on ${education.degree} in ${education.major}`
     );
 
-    setAiGeneratedDescriptionList(result);
     setIsAiLoading(false);
+
+    if (!result.success) {
+      toast({
+        title: "Uh Oh! Something went wrong.",
+        description: result.error,
+        variant: "destructive",
+        className: "bg-white border-2",
+      });
+      return;
+    }
+
+    setAiGeneratedDescriptionList(result.data ?? []);
 
     setTimeout(function () {
       listRef?.current?.scrollIntoView({

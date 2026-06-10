@@ -3,17 +3,16 @@
 import AddResume from "@/components/common/AddResume";
 import ResumeCard from "@/components/common/ResumeCard";
 import { fetchUserResumes } from "@/lib/actions/resume.actions";
-import { useUser } from "@clerk/nextjs";
+import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 
 const DashboardCards = () => {
-  const user = useUser();
-  const userId = user?.user?.id;
+  const { status } = useSession();
   const [resumeList, setResumeList] = useState(null as any);
 
   const loadResumeData = async () => {
     try {
-      const resumeData = await fetchUserResumes(userId || "");
+      const resumeData = await fetchUserResumes();
 
       setResumeList(JSON.parse(resumeData as any));
     } catch (error) {
@@ -22,13 +21,15 @@ const DashboardCards = () => {
   };
 
   useEffect(() => {
-    user?.isSignedIn && loadResumeData();
-  }, [user?.isLoaded]);
+    if (status === "authenticated") {
+      loadResumeData();
+    }
+  }, [status]);
 
   return (
     <>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 mt-10 gap-8">
-        <AddResume userId={userId} />
+        <AddResume />
 
         {resumeList !== null
           ? resumeList.map((resume: any) => (

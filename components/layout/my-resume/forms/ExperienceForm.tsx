@@ -130,8 +130,19 @@ const ExperienceForm = ({ params }: { params: { id: string } }) => {
     const result = await generateExperienceDescription(
       `${experience.title} at ${experience.companyName}`
     );
-    setAiGeneratedSummaryList(result);
     setIsLoadingAi(false);
+
+    if (!result.success) {
+      toast({
+        title: "Uh Oh! Something went wrong.",
+        description: result.error,
+        variant: "destructive",
+        className: "bg-white border-2",
+      });
+      return;
+    }
+
+    setAiGeneratedSummaryList(result.data ?? []);
 
     setTimeout(() => {
       listRef?.current?.scrollIntoView({

@@ -157,13 +157,28 @@
 }
 
 /* View Resume */
+@page {
+  size: A4;
+  margin: 0;
+}
+
 @media print {
   #no-print {
-    display: none;
+    display: none !important;
   }
 
   #print-area {
     width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  /* Preserve theme colors and backgrounds in the printed PDF. */
+  body {
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
 

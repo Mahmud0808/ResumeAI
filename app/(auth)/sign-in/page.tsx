@@ -1,12 +1,128 @@
-import { SignIn } from "@clerk/nextjs";
-import React from "react";
+"use client";
 
-const Page = () => {
+import React, { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next-nprogress-bar";
+import Link from "next/link";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import GoogleIcon from "@/components/common/GoogleIcon";
+
+const SignInPage = () => {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    setIsLoading(false);
+
+    if (result?.error) {
+      toast({
+        title: "Sign in failed",
+        description: "Invalid email or password, or too many attempts.",
+        variant: "destructive",
+        className: "bg-white",
+      });
+      return;
+    }
+
+    router.push("/dashboard");
+  };
+
   return (
-    <div className="flex h-screen items-center justify-center flex-col p-10">
-      <SignIn forceRedirectUrl={"/dashboard"} routing="hash" />
+    <div className="flex min-h-screen items-center justify-center p-6">
+      <div className="w-full max-w-md rounded-2xl border bg-white p-8 shadow-lg">
+        <h1 className="text-2xl font-bold text-slate-800">Welcome back</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Sign in to continue building your resume.
+        </p>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-6 w-full"
+          disabled={isGoogleLoading}
+          onClick={() => {
+            setIsGoogleLoading(true);
+            signIn("google", { callbackUrl: "/dashboard" });
+          }}
+        >
+          {isGoogleLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              <GoogleIcon className="mr-2 h-4 w-4" /> Continue with Google
+            </>
+          )}
+        </Button>
+
+        <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
+          <span className="h-px flex-1 bg-slate-200" /> or <span className="h-px flex-1 bg-slate-200" />
+        </div>
+
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div>
+            <label className="text-sm font-semibold text-slate-700">Email</label>
+            <Input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-semibold text-slate-700">
+              Password
+            </label>
+            <Input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              className="mt-1"
+            />
+          </div>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-primary-700 text-white hover:bg-primary-800"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in
+              </>
+            ) : (
+              "Sign in"
+            )}
+          </Button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-slate-500">
+          Don&apos;t have an account?{" "}
+          <Link href="/sign-up" className="font-semibold text-primary-700">
+            Sign up
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };
 
-export default Page;
+export default SignInPage;

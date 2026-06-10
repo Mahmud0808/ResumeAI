@@ -1,13 +1,10 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import NextAuth from "next-auth";
+import authConfig from "./auth.config";
 
-const isProtectedRoute = createRouteMatcher(["/dashboard", "/my-resume/:resumeId/edit"]);
-
-export default clerkMiddleware((auth, request) => {
-  if (isProtectedRoute(request)) {
-    auth().protect();
-  }
-});
+// Edge-safe middleware. The `authorized` callback in auth.config protects
+// /dashboard and /my-resume/:id/edit and redirects anonymous users to /sign-in.
+export const { auth: middleware } = NextAuth(authConfig);
 
 export const config = {
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

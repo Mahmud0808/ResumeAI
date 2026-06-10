@@ -1,14 +1,14 @@
-import React, { use } from "react";
+import React from "react";
 import PageWrapper from "@/components/common/PageWrapper";
 import Header from "@/components/layout/Header";
-import { currentUser } from "@clerk/nextjs/server";
+import { getCurrentUserId } from "@/lib/auth";
 import { checkResumeOwnership } from "@/lib/actions/resume.actions";
 import { redirect } from "next/navigation";
 import ResumeEditor from "@/components/layout/my-resume/ResumeEditor";
 
 const EditResume = async ({ params }: { params: { id: string } }) => {
-  const user = await currentUser();
-  const isResumeOwner = await checkResumeOwnership(user?.id || "", params.id);
+  const userId = await getCurrentUserId();
+  const isResumeOwner = await checkResumeOwnership(params.id);
 
   if (!isResumeOwner) {
     return redirect("/dashboard");
@@ -23,7 +23,7 @@ const EditResume = async ({ params }: { params: { id: string } }) => {
           Please provide the necessary information for your resume.
         </p>
       </div>
-      <ResumeEditor params={params} userId={user?.id} />
+      <ResumeEditor params={params} userId={userId ?? undefined} />
     </PageWrapper>
   );
 };

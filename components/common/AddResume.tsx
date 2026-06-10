@@ -28,9 +28,12 @@ import {
 import { createResume } from "@/lib/actions/resume.actions";
 import { toast } from "../ui/use-toast";
 import { useRouter } from "next-nprogress-bar";
+import { useSession } from "next-auth/react";
 
-const AddResume = ({ userId }: { userId: string | undefined }) => {
+const AddResume = () => {
   const router = useRouter();
+  const { status } = useSession();
+  const isSignedIn = status === "authenticated";
   const [openDialog, setOpenDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -45,7 +48,7 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
   const onSubmit = async (
     values: z.infer<typeof ResumeNameValidationSchema>
   ) => {
-    if (userId === undefined) {
+    if (!isSignedIn) {
       return;
     }
 
@@ -55,7 +58,6 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
 
     const result = await createResume({
       resumeId: uuid,
-      userId: userId,
       title: values.name,
     });
 
@@ -81,7 +83,7 @@ const AddResume = ({ userId }: { userId: string | undefined }) => {
     <>
       <div
         className="relative aspect-[1/1.2] border border-dashed border-slate-300 flex items-center justify-center bg-slate-100 rounded-xl hover:scale-105 hover:shadow-md transition-all cursor-pointer"
-        onClick={() => userId && setOpenDialog(true)}
+        onClick={() => isSignedIn && setOpenDialog(true)}
       >
         <PlusSquare className="text-slate-500" />
       </div>

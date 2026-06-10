@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Serif, Inter, Nunito } from "next/font/google";
+import { Inter, Nunito } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
-import { ClerkProvider } from "@clerk/nextjs";
+import AuthSessionProvider from "@/components/common/AuthSessionProvider";
 import Providers from "@/components/common/ProgressBarProvider";
 import "./globals.css";
 
@@ -23,21 +23,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      afterSignOutUrl="/"
-      appearance={{
-        layout: {
-          socialButtonsPlacement: "bottom",
-          logoImageUrl: "/icons/logo.svg",
-        },
-      }}
-    >
-      <html lang="en">
-        <body className={`${inter.variable} ${nunito.variable} font-inter`}>
+    <html lang="en">
+      <body className={`${inter.variable} ${nunito.variable} font-inter`}>
+        <AuthSessionProvider>
           <Providers>{children}</Providers>
           <Toaster />
-        </body>
-      </html>
-    </ClerkProvider>
+        </AuthSessionProvider>
+      </body>
+    </html>
   );
 }

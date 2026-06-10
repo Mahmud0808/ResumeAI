@@ -1,3 +1,4 @@
+import "./dns-setup";
 import mongoose from "mongoose";
 
 let isConnected = false;

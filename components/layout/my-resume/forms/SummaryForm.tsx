@@ -58,8 +58,19 @@ const SummaryForm = ({ params }: { params: { id: string } }) => {
   const generateSummaryFromAI = async () => {
     setIsAiLoading(true);
     const result = await generateSummary(formData?.jobTitle);
-    setAiGeneratedSummaryList(result);
     setIsAiLoading(false);
+
+    if (!result.success) {
+      toast({
+        title: "Uh Oh! Something went wrong.",
+        description: result.error,
+        variant: "destructive",
+        className: "bg-white",
+      });
+      return;
+    }
+
+    setAiGeneratedSummaryList(result.data ?? []);
 
     setTimeout(() => {
       listRef?.current?.scrollIntoView({

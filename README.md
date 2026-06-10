@@ -8,7 +8,7 @@
     <img src="https://img.shields.io/badge/-Next_JS-black?style=for-the-badge&logoColor=white&logo=nextdotjs&color=393D72" alt="nextjs" />
     <img src="https://img.shields.io/badge/-MongoDB-black?style=for-the-badge&logoColor=white&logo=mongodb&color=1FAD58" alt="mongodb" />
     <img src="https://img.shields.io/badge/-Tailwind_CSS-black?style=for-the-badge&logoColor=white&logo=tailwindcss&color=3FBFF8" alt="tailwindcss" />
-    <img src="https://img.shields.io/badge/-Clerk-black?style=for-the-badge&logoColor=white&logo=clerk&color=7C3AFF" alt="clerk" />
+    <img src="https://img.shields.io/badge/-NextAuth-black?style=for-the-badge&logoColor=white&logo=auth0&color=7C3AFF" alt="nextauth" />
     <img src="https://img.shields.io/badge/-Typescript-black?style=for-the-badge&logoColor=white&logo=typescript&color=387CC8" alt="typescript" />
   </div>
 
@@ -25,7 +25,7 @@
 
 - **AI-Powered Resume Generation:** Generate a professional resume using AI.
 
-- **User Authentication:** Secure login and registration with Clerk.
+- **User Authentication:** Secure login and registration with NextAuth (Google OAuth + email/password).
 
 - **Real-Time Preview:** See live updates as you fill out the resume form.
 
@@ -39,7 +39,7 @@
 
 - **Frontend:** Next.js 14
 
-- **Authentication:** Clerk
+- **Authentication:** NextAuth (Auth.js v5)
 
 - **AI Integration:** Gemini API
 
@@ -78,14 +78,15 @@ npm install
 
 ### Set Up Environment Variables
 
-Create a new file named `.env` in the root of your project and add the following content:
+Create a new file named `.env.local` in the root of your project and add the following content:
 
 ```env
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
+# Generate with: npx auth secret
+AUTH_SECRET=
 
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+# Google Cloud Console -> Credentials -> OAuth client
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
 
 MONGODB_URL=
 
@@ -94,7 +95,7 @@ GEMINI_API_KEY=
 BASE_URL=localhost:3000
 ```
 
-Replace the placeholder values with your actual credentials. You can obtain these credentials by signing up for the corresponding websites on [Clerk](https://clerk.com/), [MongoDB](https://mongodb.com/) and [Google AI Studio](https://aistudio.google.com/app/apikey). 
+Replace the placeholder values with your actual credentials. You can obtain these by signing up at [Google Cloud Console](https://console.cloud.google.com/) (OAuth), [MongoDB](https://mongodb.com/) and [Google AI Studio](https://aistudio.google.com/app/apikey). See [docs/AUTH_SETUP.md](docs/AUTH_SETUP.md) for the full auth setup.
 
 ### Running the Project
 

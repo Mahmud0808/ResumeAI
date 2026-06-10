@@ -1,23 +1,46 @@
 "use server";
 
-import { useUser } from "@clerk/nextjs";
 import Education from "../models/education.model";
 import Experience from "../models/experience.model";
 import Resume from "../models/resume.model";
 import Skill from "../models/skill.model";
 import { connectToDB } from "../mongoose";
+import { getCurrentUserId, requireUserId } from "../auth";
 import { revalidatePath } from "next/cache";
+
+/**
+ * Loads a resume and verifies the authenticated caller owns it.
+ * Throws "Unauthorized" if not signed in, "Forbidden" if it belongs to
+ * someone else, and "Resume not found" if it does not exist.
+ */
+async function assertResumeOwner(resumeId: string) {
+  const userId = await requireUserId();
+
+  await connectToDB();
+
+  const resume = await Resume.findOne({ resumeId });
+
+  if (!resume) {
+    throw new Error("Resume not found");
+  }
+
+  if (resume.userId !== userId) {
+    throw new Error("Forbidden");
+  }
+
+  return resume;
+}
 
 export async function createResume({
   resumeId,
-  userId,
   title,
 }: {
   resumeId: string;
-  userId: string;
   title: string;
 }) {
   try {
+    const userId = await requireUserId();
+
     await connectToDB();
 
     const newResume = await Resume.create({
@@ -57,12 +80,10 @@ export async function fetchResume(resumeId: string) {
   }
 }
 
-export async function fetchUserResumes(userId: string) {
-  if (userId === "") {
-    return [];
-  }
-
+export async function fetchUserResumes() {
   try {
+    const userId = await requireUserId();
+
     await connectToDB();
 
     const resumes = await Resume.find({ userId: userId });
@@ -73,19 +94,22 @@ export async function fetchUserResumes(userId: string) {
   }
 }
 
-export async function checkResumeOwnership(userId: string, resumeId: string) {
-  if (userId === "") {
-    return false;
-  }
-
+export async function checkResumeOwnership(resumeId: string) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return false;
+    }
+
     await connectToDB();
 
     const resume = await Resume.findOne({ resumeId: resumeId, userId: userId });
 
     return resume ? true : false;
   } catch (error: any) {
-    throw new Error(`Failed to check resume ownership: ${error.message}`);
+    console.error(`Failed to check resume ownership: ${error.message}`);
+    return false;
   }
 }
 
@@ -106,13 +130,7 @@ export async function updateResume({
   }>;
 }) {
   try {
-    await connectToDB();
-
-    const resume = await Resume.findOne({ resumeId: resumeId });
-
-    if (!resume) {
-      return { success: false, error: "Resume not found" };
-    }
+    const resume = await assertResumeOwner(resumeId);
 
     Object.keys(updates).forEach((key) => {
       const updateValue = updates[key as keyof typeof updates];
@@ -138,11 +156,7 @@ export async function addExperienceToResume(
   experienceDataArray: any
 ) {
   try {
-    const resume = await Resume.findOne({ resumeId: resumeId });
-
-    if (!resume) {
-      throw new Error("Resume not found");
-    }
+    const resume = await assertResumeOwner(resumeId);
 
     const savedExperiences = await Promise.all(
       experienceDataArray.map(async (experienceData: any) => {
@@ -180,11 +194,7 @@ export async function addEducationToResume(
   educationDataArray: any
 ) {
   try {
-    const resume = await Resume.findOne({ resumeId: resumeId });
-
-    if (!resume) {
-      throw new Error("Resume not found");
-    }
+    const resume = await assertResumeOwner(resumeId);
 
     const savedEducation = await Promise.all(
       educationDataArray.map(async (educationData: any) => {
@@ -215,16 +225,9 @@ export async function addEducationToResume(
   }
 }
 
-export async function addSkillToResume(
-  resumeId: string,
-  skillDataArray: any
-) {
+export async function addSkillToResume(resumeId: string, skillDataArray: any) {
   try {
-    const resume = await Resume.findOne({ resumeId: resumeId });
-
-    if (!resume) {
-      throw new Error("Resume not found");
-    }
+    const resume = await assertResumeOwner(resumeId);
 
     const savedSkills = await Promise.all(
       skillDataArray.map(async (skillData: any) => {
@@ -255,7 +258,7 @@ export async function addSkillToResume(
 
 export async function deleteResume(resumeId: string, path: string) {
   try {
-    await connectToDB();
+    await assertResumeOwner(resumeId);
 
     await Resume.findOneAndDelete({ resumeId: resumeId });
 

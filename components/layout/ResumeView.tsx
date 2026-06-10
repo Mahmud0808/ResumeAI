@@ -10,7 +10,6 @@ import { usePathname } from "next/navigation";
 import PageWrapper from "@/components/common/PageWrapper";
 import { DownloadIcon, Share2Icon } from "lucide-react";
 import { fetchResume } from "@/lib/actions/resume.actions";
-import html2pdf from "html2pdf.js";
 
 interface FinalResumeViewProps {
   params: { id: string };
@@ -21,7 +20,6 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
   params,
   isOwnerView,
 }) => {
-  const [download, setDownload] = useState<boolean>(false);
   const path = usePathname();
   const [formData, setFormData] = useState<any>({});
 
@@ -40,31 +38,27 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
   const sanitize = (str: string | undefined | null): string =>
     str?.trim().replace(/\s+/g, "_") || "User_Resume";
 
+  /**
+   * Uses the browser's native print-to-PDF. Real vector text (selectable,
+   * ATS-readable), no server cost. The @media print rules in globals.css hide
+   * everything except #print-area. Setting document.title seeds the suggested
+   * filename in the print dialog's "Save as PDF".
+   */
   const handleDownloadPDF = () => {
-    const element = document.getElementById("print-area");
-    const opt = {
-      margin: 0,
-      filename: `${sanitize(
-        `${formData?.firstName ?? "User"}_${formData?.lastName ?? ""}_${
-          formData?.jobTitle ?? ""
-        }_Resume.pdf`
-      )}`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+    const previousTitle = document.title;
+    document.title = sanitize(
+      `${formData?.firstName ?? "User"}_${formData?.lastName ?? ""}_${
+        formData?.jobTitle ?? ""
+      }_Resume`
+    );
+
+    const restore = () => {
+      document.title = previousTitle;
+      window.removeEventListener("afterprint", restore);
     };
+    window.addEventListener("afterprint", restore);
 
-    if (element) {
-      setDownload(true);
-
-      html2pdf()
-        .set(opt)
-        .from(element)
-        .save()
-        .finally(() => {
-          setDownload(false);
-        });
-    }
+    window.print();
   };
 
   return (
@@ -121,7 +115,7 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
           </div>
           <div className="px-10 pt-4 pb-16 max-sm:px-5 max-sm:pb-8 print:p-0">
             <div id="print-area">
-              <ResumePreview download={download} />
+              <ResumePreview />
             </div>
           </div>
         </FormProvider>
