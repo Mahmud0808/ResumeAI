@@ -11,9 +11,10 @@ import {
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }): Promise<Metadata> {
-  const data = await fetchResume(params.id);
+  const { id } = await params;
+  const data = await fetchResume(id);
   const resume = JSON.parse(data || "{}");
 
   if (resume?.firstName === undefined && resume?.lastName === undefined) {
@@ -31,10 +32,11 @@ export async function generateMetadata({
   };
 }
 
-const MyResume = async ({ params }: { params: { id: string } }) => {
+const MyResume = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
   const [isResumeOwner, viewable] = await Promise.all([
-    checkResumeOwnership(params.id),
-    canViewResume(params.id),
+    checkResumeOwnership(id),
+    canViewResume(id),
   ]);
 
   if (!viewable) {
@@ -53,7 +55,7 @@ const MyResume = async ({ params }: { params: { id: string } }) => {
     );
   }
 
-  return <FinalResumeView params={params} isOwnerView={isResumeOwner} />;
+  return <FinalResumeView params={{ id }} isOwnerView={isResumeOwner} />;
 };
 
 export default MyResume;

@@ -6,9 +6,14 @@ import { checkResumeOwnership } from "@/lib/actions/resume.actions";
 import { redirect } from "next/navigation";
 import ResumeEditor from "@/components/layout/my-resume/ResumeEditor";
 
-const EditResume = async ({ params }: { params: { id: string } }) => {
+const EditResume = async ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
+  const { id } = await params;
   const userId = await getCurrentUserId();
-  const isResumeOwner = await checkResumeOwnership(params.id);
+  const isResumeOwner = await checkResumeOwnership(id);
 
   if (!isResumeOwner) {
     return redirect("/dashboard");
@@ -23,7 +28,7 @@ const EditResume = async ({ params }: { params: { id: string } }) => {
           Please provide the necessary information for your resume.
         </p>
       </div>
-      <ResumeEditor params={params} userId={userId ?? undefined} />
+      <ResumeEditor params={{ id }} userId={userId ?? undefined} />
     </PageWrapper>
   );
 };

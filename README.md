@@ -95,10 +95,6 @@ MONGODB_URL=
 GEMINI_API_KEY=
 
 BASE_URL=localhost:3000
-
-# Optional: only set locally if Node fails Atlas SRV lookups
-# (querySrv ECONNREFUSED). Leave unset on Vercel.
-# DNS_SERVERS=
 ```
 
 Replace the placeholder values with your actual credentials. You can obtain these by signing up at [Google Cloud Console](https://console.cloud.google.com/) (OAuth), [MongoDB](https://mongodb.com/) and [Google AI Studio](https://aistudio.google.com/app/apikey). See [docs/AUTH_SETUP.md](docs/AUTH_SETUP.md) for the full auth setup.

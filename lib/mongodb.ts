@@ -1,4 +1,3 @@
-import "./dns-setup";
 import {
   MongoClient,
   type Collection,

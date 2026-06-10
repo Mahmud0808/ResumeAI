@@ -1,26 +1,39 @@
-import "./dns-setup";
 import mongoose from "mongoose";
 
-let isConnected = false;
+let connectionPromise: Promise<typeof mongoose> | null = null;
 
 export const connectToDB = async () => {
-  mongoose.set("strictQuery", true);
-
   if (!process.env.MONGODB_URL) {
     throw new Error("MONGODB_URL is not set");
   }
 
-  if (isConnected) {
+  // Already connected.
+  if (mongoose.connection.readyState === 1) {
     return;
   }
 
-  try {
-    await mongoose.connect(process.env.MONGODB_URL);
-    isConnected = true;
-    console.log("MongoDB connected");
-  } catch (error: any) {
-    // Surface the failure instead of swallowing it — callers otherwise hit
-    // confusing "no document" errors against a dead connection.
-    throw new Error(`Failed to connect to MongoDB: ${error?.message ?? error}`);
+  // Reuse an in-flight connection attempt instead of opening duplicates.
+  if (!connectionPromise) {
+    mongoose.set("strictQuery", true);
+
+    connectionPromise = mongoose
+      .connect(process.env.MONGODB_URL, {
+        // Fail fast and surface the real error instead of mongoose silently
+        // buffering operations for 10s and throwing a confusing timeout.
+        serverSelectionTimeoutMS: 10000,
+        bufferCommands: false,
+      })
+      .then((m) => {
+        console.log("MongoDB connected");
+        return m;
+      })
+      .catch((error: any) => {
+        connectionPromise = null; // allow a retry on the next call
+        throw new Error(
+          `Failed to connect to MongoDB: ${error?.message ?? error}`
+        );
+      });
   }
+
+  await connectionPromise;
 };

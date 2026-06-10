@@ -34,14 +34,13 @@ Add `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `MONGODB_URL`,
 the deployment URL; set `AUTH_URL=https://resume-ai-app.vercel.app` only if
 callbacks misbehave behind a proxy.
 
-## Local DNS note (optional)
+## MongoDB connection note
 
-If `npm run dev` logs `querySrv ECONNREFUSED` for the Atlas SRV record even
-though `nslookup -type=SRV _mongodb._tcp.<cluster>` works, Node's resolver is
-refusing SRV queries (common on Windows / VPN / corporate networks). Set
-`DNS_SERVERS` in `.env.local` to a resolver that answers SRV — e.g.
-`DNS_SERVERS=172.16.172.10`. Applied in `lib/dns-setup.ts`; leave it **unset on
-Vercel**.
+If Node fails to resolve the Atlas SRV record locally (`querySrv ECONNREFUSED`)
+even though `nslookup` works — common on Windows / VPN / corporate networks —
+use a non-SRV connection string instead: Atlas → Connect → Drivers → version
+"2.2.12 or earlier" gives a `mongodb://host1,host2,host3/...` URL with explicit
+shard hosts and `replicaSet=`. It needs no SRV lookup and works everywhere.
 
 ## Code map
 
