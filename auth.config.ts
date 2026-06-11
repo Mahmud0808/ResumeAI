@@ -19,6 +19,12 @@ export default {
     signIn: "/sign-in",
   },
   providers: [
+    // Auto-linking is ON for UX (one identity per email). The classic risk —
+    // attacker pre-registers a victim's email as an unverified credentials
+    // account, then the victim's Google login merges into it and the attacker's
+    // password unlocks the account — is neutralized in auth.ts: the first time
+    // a Google sign-in verifies a previously-unverified account, any
+    // pre-existing password is dropped. So a planted password never survives.
     Google({
       allowDangerousEmailAccountLinking: true,
     }),

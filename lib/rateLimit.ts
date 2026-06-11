@@ -46,26 +46,31 @@ export async function rateLimit(
   const col = await getRateLimitCollection();
   const now = Date.now();
 
-  const existing = await col.findOne({ key });
+  // Atomically increment the counter only while the window is still live. Doing
+  // the read+increment in one operation closes the TOCTOU race where parallel
+  // requests each read count<max and slip past the limit together.
+  const live = await col.findOneAndUpdate(
+    { key, expiresAt: { $gt: new Date(now) } },
+    { $inc: { count: 1 } },
+    { returnDocument: "after" }
+  );
 
-  if (!existing || existing.expiresAt.getTime() <= now) {
-    // Start a fresh window.
-    await col.updateOne(
-      { key },
-      { $set: { key, count: 1, expiresAt: new Date(now + windowMs) } },
-      { upsert: true }
-    );
-    return { allowed: true, remaining: max - 1, retryAfterMs: windowMs };
+  if (live) {
+    const retryAfterMs = live.expiresAt.getTime() - now;
+    if (live.count > max) {
+      return { allowed: false, remaining: 0, retryAfterMs };
+    }
+    return { allowed: true, remaining: max - live.count, retryAfterMs };
   }
 
-  const retryAfterMs = existing.expiresAt.getTime() - now;
-
-  if (existing.count >= max) {
-    return { allowed: false, remaining: 0, retryAfterMs };
-  }
-
-  await col.updateOne({ key }, { $inc: { count: 1 } });
-  return { allowed: true, remaining: max - existing.count - 1, retryAfterMs };
+  // No live window (missing or expired): start a fresh one. The filter on
+  // expiresAt prevents a concurrent live request from being clobbered here.
+  await col.updateOne(
+    { key },
+    { $set: { key, count: 1, expiresAt: new Date(now + windowMs) } },
+    { upsert: true }
+  );
+  return { allowed: true, remaining: max - 1, retryAfterMs: windowMs };
 }
 
 /** Clears the window for `key` (e.g. after a successful login). */
@@ -76,8 +81,11 @@ export async function resetRateLimit(key: string): Promise<void> {
 
 // ---- Login brute-force protection -------------------------------------------
 
-const LOGIN_MAX_ATTEMPTS = 5;
-const LOGIN_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+// Loosened in development so iterating on the auth flow doesn't lock you out.
+// Production stays strict for brute-force protection.
+const isDev = process.env.NODE_ENV === "development";
+const LOGIN_MAX_ATTEMPTS = isDev ? 1000 : 5;
+const LOGIN_WINDOW_MS = (isDev ? 1 : 15) * 60 * 1000; // dev: 1 min, prod: 15 min
 
 function loginKey(email: string, ip: string) {
   return `login:${email.toLowerCase()}:${ip}`;
@@ -94,6 +102,28 @@ export async function checkLoginAllowed(
     LOGIN_WINDOW_MS
   );
   return allowed;
+}
+
+/**
+ * Read-only check of the current login lock for an email+IP — does NOT count as
+ * an attempt. Lets the sign-in page surface an accurate "too many attempts"
+ * message after Auth.js has swallowed the throw reason.
+ */
+export async function peekLoginLimited(
+  email: string,
+  ip: string
+): Promise<{ limited: boolean; retryAfterMs: number }> {
+  const col = await getRateLimitCollection();
+  const now = Date.now();
+  const doc = await col.findOne({ key: loginKey(email, ip) });
+
+  if (!doc || doc.expiresAt.getTime() <= now) {
+    return { limited: false, retryAfterMs: 0 };
+  }
+  return {
+    limited: doc.count >= LOGIN_MAX_ATTEMPTS,
+    retryAfterMs: doc.expiresAt.getTime() - now,
+  };
 }
 
 /** Clears the brute-force counter after a successful login. */

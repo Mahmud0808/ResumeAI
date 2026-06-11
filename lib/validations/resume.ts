@@ -186,3 +186,78 @@ export const SkillValidationSchema = z.object({
     })
   ),
 });
+
+/* ----------------------------------------------------------------------------
+ * Server-side item schemas.
+ *
+ * The client schemas above validate the whole form. Server actions receive raw
+ * arrays of sub-documents that ALSO carry a Mongo `_id` (existing rows) and may
+ * carry attacker-controlled extra keys. These schemas: (a) allow an optional
+ * `_id`, (b) by default STRIP any unknown key (zod's default), so junk fields
+ * can never reach mongoose, and (c) re-run the same field rules server-side so
+ * a hand-crafted request that skips the client cannot persist garbage.
+ * ------------------------------------------------------------------------- */
+
+const objectId = z
+  .string()
+  .regex(/^[a-fA-F0-9]{24}$/, { message: "Invalid id" })
+  .optional();
+
+const dateOrdered = (
+  data: { startDate: string; endDate?: string },
+  ctx: z.RefinementCtx
+) => {
+  if (data.endDate) {
+    const start = new Date(data.startDate);
+    const end = new Date(data.endDate);
+    if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime())) {
+      if (end < start) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "End date must be on or after the start date",
+          path: ["endDate"],
+        });
+      }
+    }
+  }
+};
+
+export const ExperienceItemServerSchema = z
+  .object({
+    _id: objectId,
+    title,
+    companyName,
+    city,
+    state,
+    startDate,
+    endDate,
+    workSummary: descriptionSchema,
+  })
+  .superRefine(dateOrdered);
+
+export const EducationItemServerSchema = z
+  .object({
+    _id: objectId,
+    universityName,
+    degree,
+    major,
+    startDate,
+    endDate,
+    description: descriptionSchema,
+  })
+  .superRefine(dateOrdered);
+
+export const SkillItemServerSchema = z.object({
+  _id: objectId,
+  name,
+  rating,
+  category: z
+    .string()
+    .trim()
+    .max(50, { message: "Group must not exceed 50 characters" })
+    .optional(),
+});
+
+export const ExperienceArrayServerSchema = z.array(ExperienceItemServerSchema);
+export const EducationArrayServerSchema = z.array(EducationItemServerSchema);
+export const SkillArrayServerSchema = z.array(SkillItemServerSchema);

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next-nprogress-bar";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -20,6 +20,7 @@ const SignUpPage = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +50,14 @@ const SignUpPage = () => {
       return;
     }
 
+    // New credential accounts must verify their email before they can sign in.
+    if (result.requiresVerification) {
+      setIsLoading(false);
+      setVerificationSent(true);
+      return;
+    }
+
+    // Existing OAuth account that just set a password — already verified.
     const signInResult = await signIn("credentials", {
       email,
       password,
@@ -79,6 +88,27 @@ const SignUpPage = () => {
             ResumeAI
           </span>
         </Link>
+
+        {verificationSent ? (
+          <div className="text-center">
+            <MailCheck className="mx-auto h-12 w-12 text-primary-700" />
+            <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">
+              Verify your email
+            </h1>
+            <p className="mt-2 text-sm text-slate-500">
+              We sent a verification link to{" "}
+              <span className="font-medium">{email}</span>. Click it to activate
+              your account, then sign in. The link expires in 24 hours.
+            </p>
+            <Link
+              href="/sign-in"
+              className="mt-6 inline-block rounded-full bg-primary-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-800"
+            >
+              Go to sign in
+            </Link>
+          </div>
+        ) : (
+          <>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
           Create your account
         </h1>
@@ -170,6 +200,8 @@ const SignUpPage = () => {
             Sign in
           </Link>
         </p>
+          </>
+        )}
       </motion.div>
     </div>
   );

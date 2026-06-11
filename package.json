@@ -32,6 +32,7 @@
     "next": "^16.2.9",
     "next-auth": "^5.0.0-beta.31",
     "next-nprogress-bar": "^2.3.12",
+    "nodemailer": "^7.0.13",
     "quill": "^2.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -46,6 +47,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.1",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^10.0.0",

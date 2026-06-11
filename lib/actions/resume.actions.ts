@@ -7,6 +7,11 @@ import Skill from "../models/skill.model";
 import { connectToDB } from "../mongoose";
 import { getCurrentUserId, requireUserId } from "../auth";
 import { verifyOwnership } from "../ownership";
+import {
+  EducationArrayServerSchema,
+  ExperienceArrayServerSchema,
+  SkillArrayServerSchema,
+} from "../validations/resume";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -196,11 +201,31 @@ export async function updateResume({
   try {
     const resume = await assertResumeOwner(resumeId);
 
-    Object.keys(updates).forEach((key) => {
-      const updateValue = updates[key as keyof typeof updates];
+    // Whitelist updatable fields so a crafted payload cannot set protected
+    // columns such as `userId` (ownership) or `resumeId` via mass assignment.
+    const ALLOWED_FIELDS: (keyof typeof updates)[] = [
+      "title",
+      "firstName",
+      "lastName",
+      "jobTitle",
+      "address",
+      "phone",
+      "email",
+      "summary",
+      "themeColor",
+      "template",
+      "sectionOrder",
+      "skillsStyle",
+      "dateFormat",
+      "hiddenSections",
+      "customSections",
+      "isPublic",
+    ];
 
+    ALLOWED_FIELDS.forEach((key) => {
+      const updateValue = updates[key];
       if (updateValue !== undefined) {
-        resume[key as keyof typeof updates] = updateValue;
+        resume[key] = updateValue;
       }
     });
 
@@ -220,24 +245,33 @@ export async function addExperienceToResume(
   experienceDataArray: any
 ) {
   try {
+    // Validate + strip unknown keys before anything touches the DB.
+    const parsed = ExperienceArrayServerSchema.safeParse(experienceDataArray);
+    if (!parsed.success) {
+      return { success: false, error: "Invalid experience data." };
+    }
+    const items = parsed.data;
+
     const resume = await assertResumeOwner(resumeId);
     const previousExperienceIds = resume.experience ?? [];
+    // Only ids already attached to THIS resume may be updated by _id. Stops a
+    // caller passing another resume's (or another user's) sub-doc id to
+    // overwrite it (IDOR). Unknown ids are treated as new inserts.
+    const ownedIds = new Set(
+      previousExperienceIds.map((id: any) => id.toString())
+    );
 
     const savedExperiences = await Promise.all(
-      experienceDataArray.map(async (experienceData: any) => {
-        if (experienceData._id) {
-          const existingExperience = await Experience.findById(
-            experienceData._id
+      items.map(async (experienceData) => {
+        if (experienceData._id && ownedIds.has(experienceData._id.toString())) {
+          return await Experience.findByIdAndUpdate(
+            experienceData._id,
+            experienceData,
+            { new: true }
           );
-          if (existingExperience) {
-            return await Experience.findByIdAndUpdate(
-              experienceData._id,
-              experienceData,
-              { new: true }
-            );
-          }
         }
-        const newExperience = new Experience(experienceData);
+        const { _id, ...data } = experienceData;
+        const newExperience = new Experience(data);
         return await newExperience.save();
       })
     );
@@ -261,22 +295,30 @@ export async function addEducationToResume(
   educationDataArray: any
 ) {
   try {
+    const parsed = EducationArrayServerSchema.safeParse(educationDataArray);
+    if (!parsed.success) {
+      return { success: false, error: "Invalid education data." };
+    }
+    const items = parsed.data;
+
     const resume = await assertResumeOwner(resumeId);
     const previousEducationIds = resume.education ?? [];
+    // Only ids already on this resume may be updated by _id (IDOR guard).
+    const ownedIds = new Set(
+      previousEducationIds.map((id: any) => id.toString())
+    );
 
     const savedEducation = await Promise.all(
-      educationDataArray.map(async (educationData: any) => {
-        if (educationData._id) {
-          const existingEducation = await Education.findById(educationData._id);
-          if (existingEducation) {
-            return await Education.findByIdAndUpdate(
-              educationData._id,
-              educationData,
-              { new: true }
-            );
-          }
+      items.map(async (educationData) => {
+        if (educationData._id && ownedIds.has(educationData._id.toString())) {
+          return await Education.findByIdAndUpdate(
+            educationData._id,
+            educationData,
+            { new: true }
+          );
         }
-        const newEducation = new Education(educationData);
+        const { _id, ...data } = educationData;
+        const newEducation = new Education(data);
         return await newEducation.save();
       })
     );
@@ -297,20 +339,26 @@ export async function addEducationToResume(
 
 export async function addSkillToResume(resumeId: string, skillDataArray: any) {
   try {
+    const parsed = SkillArrayServerSchema.safeParse(skillDataArray);
+    if (!parsed.success) {
+      return { success: false, error: "Invalid skill data." };
+    }
+    const items = parsed.data;
+
     const resume = await assertResumeOwner(resumeId);
     const previousSkillIds = resume.skills ?? [];
+    // Only ids already on this resume may be updated by _id (IDOR guard).
+    const ownedIds = new Set(previousSkillIds.map((id: any) => id.toString()));
 
     const savedSkills = await Promise.all(
-      skillDataArray.map(async (skillData: any) => {
-        if (skillData._id) {
-          const existingSkill = await Skill.findById(skillData._id);
-          if (existingSkill) {
-            return await Skill.findByIdAndUpdate(skillData._id, skillData, {
-              new: true,
-            });
-          }
+      items.map(async (skillData) => {
+        if (skillData._id && ownedIds.has(skillData._id.toString())) {
+          return await Skill.findByIdAndUpdate(skillData._id, skillData, {
+            new: true,
+          });
         }
-        const newSkill = new Skill(skillData);
+        const { _id, ...data } = skillData;
+        const newSkill = new Skill(data);
         return await newSkill.save();
       })
     );

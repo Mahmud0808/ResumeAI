@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { resolveSignInIssue } from "@/lib/actions/auth.actions";
 import GoogleIcon from "@/components/common/GoogleIcon";
 import { motion } from "framer-motion";
 
@@ -29,18 +30,40 @@ const SignInPage = () => {
       redirect: false,
     });
 
-    setIsLoading(false);
-
     if (result?.error) {
+      // Auth.js hides the reason, so ask the server which case this is and show
+      // an accurate message (rate-limited / unverified / wrong credentials).
+      const { unverified, rateLimited, retryAfterMinutes } =
+        await resolveSignInIssue(email);
+      setIsLoading(false);
+
+      if (rateLimited) {
+        toast({
+          title: "Too many attempts",
+          description: `Please try again in about ${retryAfterMinutes} minute${
+            retryAfterMinutes === 1 ? "" : "s"
+          }.`,
+          variant: "destructive",
+          className: "bg-white",
+        });
+        return;
+      }
+
+      if (unverified) {
+        router.push(`/check-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
       toast({
         title: "Sign in failed",
-        description: "Invalid email or password, or too many attempts.",
+        description: "Invalid email or password.",
         variant: "destructive",
         className: "bg-white",
       });
       return;
     }
 
+    setIsLoading(false);
     router.push("/dashboard");
   };
 
@@ -101,9 +124,17 @@ const SignInPage = () => {
             />
           </div>
           <div>
-            <label className="text-sm font-semibold text-slate-700">
-              Password
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-semibold text-slate-700">
+                Password
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-xs font-medium text-primary-700 hover:text-primary-800 hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <Input
               type="password"
               required

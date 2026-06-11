@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
-import { LogOut } from "lucide-react";
+import { KeyRound, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import ChangePasswordDialog from "@/components/common/ChangePasswordDialog";
 
 const initialsOf = (name?: string | null, email?: string | null) => {
   const base = name?.trim() || email?.split("@")[0] || "U";
@@ -24,6 +25,7 @@ const initialsOf = (name?: string | null, email?: string | null) => {
 const UserMenu = ({ showName = true }: { showName?: boolean }) => {
   const { data: session } = useSession();
   const user = session?.user;
+  const [pwOpen, setPwOpen] = useState(false);
 
   if (!user) {
     return null;
@@ -57,12 +59,20 @@ const UserMenu = ({ showName = true }: { showName?: boolean }) => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
+          onClick={() => setPwOpen(true)}
+          className="cursor-pointer"
+        >
+          <KeyRound className="mr-2 h-4 w-4" /> Change password
+        </DropdownMenuItem>
+        <DropdownMenuItem
           onClick={() => signOut({ callbackUrl: "/" })}
           className="cursor-pointer text-red-600"
         >
           <LogOut className="mr-2 h-4 w-4" /> Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
+
+      <ChangePasswordDialog open={pwOpen} onOpenChange={setPwOpen} />
     </DropdownMenu>
   );
 };

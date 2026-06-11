@@ -57,8 +57,12 @@
 
 ### 🔐 Security & Accounts
 
-- **User Authentication:** Secure login and registration with NextAuth (Google OAuth + email/password), with brute-force rate limiting.
-- **Ownership Checks:** Server-side ownership verification on every mutation; private resumes are unreadable by non-owners.
+- **User Authentication:** Secure login and registration with NextAuth (Google OAuth + email/password), with brute-force rate limiting (relaxed automatically in development).
+- **Email Verification:** New email/password accounts confirm ownership via a one-time link before sign-in. Unverified sign-ins are routed to a "check your email" page that re-sends the link — never a dead end.
+- **Password Management:** Change or set a password from the user menu (current password required), plus a full forgot-password / reset flow over email.
+- **Safe Account Linking:** Google and email/password sign-ins share one identity per email. Any password set before an email is first verified is dropped on link, preventing account pre-hijacking.
+- **Hardened Auth:** bcrypt cost-12 hashing, constant-time login (no user-enumeration timing oracle), single-use SHA-256-hashed email tokens with TTL expiry, and enumeration-safe responses.
+- **Ownership & Input Safety:** Server-side ownership verification on every mutation (private resumes unreadable by non-owners), Zod validation on all server actions, field whitelisting against mass assignment, and prompt-injection-hardened AI calls.
 
 ### 💅 Experience
 
@@ -72,6 +76,8 @@
 - **Language:** TypeScript
 
 - **Authentication:** NextAuth (Auth.js v5)
+
+- **Email:** Nodemailer (SMTP)
 
 - **AI Integration:** Gemini API
 
@@ -130,10 +136,22 @@ MONGODB_URL=
 
 GEMINI_API_KEY=
 
+# Email (SMTP) — verification + password-reset links. Use a DEDICATED mailbox
+# (e.g. a Gmail made for the app) so your personal address is never exposed.
+# Free, no custom domain needed:
+#   Gmail : smtp.gmail.com : 587  (SMTP_PASS = a Google App Password)
+#   Brevo : smtp-relay.brevo.com : 587
+# If left blank, emails are skipped and the link is logged to the server console.
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=ResumeAI <resumeai.mailer@gmail.com>
+
 BASE_URL=localhost:3000
 ```
 
-Replace the placeholder values with your actual credentials. You can obtain these by signing up at [Google Cloud Console](https://console.cloud.google.com/) (OAuth), [MongoDB](https://mongodb.com/) and [Google AI Studio](https://aistudio.google.com/app/apikey). See [docs/AUTH_SETUP.md](docs/AUTH_SETUP.md) for the full auth setup.
+Replace the placeholder values with your actual credentials. You can obtain these by signing up at [Google Cloud Console](https://console.cloud.google.com/) (OAuth), [MongoDB](https://mongodb.com/) and [Google AI Studio](https://aistudio.google.com/app/apikey). For email, create a dedicated mailbox and generate an [App Password](https://myaccount.google.com/apppasswords) (Gmail) or use any SMTP provider. See [docs/AUTH_SETUP.md](docs/AUTH_SETUP.md) for the full auth setup.
 
 ### Running the Project
 
