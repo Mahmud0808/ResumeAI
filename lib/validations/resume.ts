@@ -63,6 +63,21 @@ export const descriptionSchema = z
     { message: " cannot be empty or just whitespace" }
   );
 
+// Optional variant: empty or whitespace-only is allowed (the field can be left
+// blank). If the user does write something, it must still be meaningful.
+export const optionalDescriptionSchema = z
+  .string()
+  .max(1500, { message: " must not exceed 1500 characters" })
+  .optional()
+  .refine(
+    (value) => {
+      if (!value) return true;
+      const plainText = stripHtml(value).trim();
+      return plainText.length === 0 || plainText.length >= 10;
+    },
+    { message: " must be at least 10 characters" }
+  );
+
 export const universityName = z.string().min(3, {
   message: "University name must be at least 3 characters long",
 });
@@ -134,7 +149,7 @@ export const EducationValidationSchema = z.object({
         major,
         startDate,
         endDate,
-        description: descriptionSchema,
+        description: optionalDescriptionSchema,
       })
       .refine(
         (data) => {
@@ -243,7 +258,7 @@ export const EducationItemServerSchema = z
     major,
     startDate,
     endDate,
-    description: descriptionSchema,
+    description: optionalDescriptionSchema,
   })
   .superRefine(dateOrdered);
 

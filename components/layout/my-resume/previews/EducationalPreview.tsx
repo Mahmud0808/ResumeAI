@@ -45,7 +45,7 @@ const EducationalPreview = () => {
                 : formatResumeDate(education?.endDate, formData?.dateFormat)}
             </span>
           </h2>
-          {education?.description && (
+          {education?.description?.trim() && (
             <p className="text-xs my-2 text-justify break-words">{education?.description}</p>
           )}
         </div>
