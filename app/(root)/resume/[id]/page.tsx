@@ -25,10 +25,30 @@ export async function generateMetadata({
     };
   }
 
+  const fullName =
+    `${resume?.firstName ?? ""} ${resume?.lastName ?? ""}`.trim() || "User";
+  const title = `${fullName} - ResumeAI`;
+  const description = `${fullName}'s Resume. Powered by ResumeAI.`;
+  const url = `/resume/${id}`;
+
   return {
-    title: `${resume?.firstName}${resume?.firstName && " "}
-    ${resume?.lastName}${resume?.lastName && " "}- ResumeAI`,
-    description: `${resume?.firstName} ${resume?.lastName}'s Resume. Powered by ResumeAI.`,
+    title,
+    description,
+    // Rich link preview for Messenger / social. The og:image + twitter:image
+    // are injected automatically by the per-resume opengraph-image.tsx in this
+    // route segment, so they are intentionally omitted here.
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: "ResumeAI",
+      type: "profile",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 

@@ -135,7 +135,12 @@ const FinalResumeView: React.FC<FinalResumeViewProps> = ({
                 <RWebShare
                   data={{
                     text: "Check out my resume!",
-                    url: `${path}`,
+                    // Absolute URL so chat apps can resolve a link preview;
+                    // a bare pathname would not unfurl.
+                    url:
+                      typeof window !== "undefined"
+                        ? window.location.href
+                        : path,
                     title: `${formData?.firstName ?? "User"} ${
                       formData?.lastName ?? "Resume"
                     }'s Resume`,
